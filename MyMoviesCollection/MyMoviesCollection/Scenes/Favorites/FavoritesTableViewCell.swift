@@ -147,7 +147,7 @@ class FavoritesTableViewCell: UITableViewCell {
                 case .success(let response):
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
-                        self.bannerView.image = response.banner
+                        self.bannerView.image = response
                     }
                 }
             })

@@ -37,36 +37,4 @@ enum MoviesList {
             }
         }
     }
-    
-//    enum Banner {
-//        struct Request {
-//            let cell: UITableViewCell
-//            let url: String
-//
-//            init(url: String, cell: UITableViewCell) {
-//                self.url = url
-//                self.cell = cell
-//            }
-//        }
-//
-//        struct Response {
-//            let image: UIImage
-//            let cell: UITableViewCell
-//
-//            init(image: UIImage, cell: UITableViewCell) {
-//                self.image = image
-//                self.cell = cell
-//            }
-//        }
-//
-//        struct ViewModel {
-//            let image: UIImage
-//            let cell: UITableViewCell
-//
-//            init(image: UIImage, cell: UITableViewCell) {
-//                self.image = image
-//                self.cell = cell
-//            }
-//        }
-//    }
 }

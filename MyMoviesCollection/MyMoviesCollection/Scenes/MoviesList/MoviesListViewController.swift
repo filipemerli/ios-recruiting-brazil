@@ -10,21 +10,11 @@ import UIKit
 
 protocol MoviesListDisplayLogic: class {
     func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel)
-    func showEmptyStateIfNeeded()
 }
 
 class MoviesListViewController: UIViewController {
     
     // MARK:  Properties
-    
-    private let itemsPerRow: CGFloat = 2
-    private let numOfSects = 2
-    private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
-    var interactor: MoviesListBusinessLogic?
-    var router: (NSObjectProtocol & MoviesListRoutingLogic & MoviesListDataPassing)?
-    private(set) var movies = [Movie]()
-    private let reuseIdentifier = "movcell"
-    private let collectionLayout = MoviesListFlowLayout()
     
     private lazy var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()
@@ -51,12 +41,69 @@ class MoviesListViewController: UIViewController {
         return collection
     }()
     
+    var interactor: MoviesListBusinessLogic?
+    var router: (NSObjectProtocol & MoviesListRoutingLogic & MoviesListDataPassing)?
+    private let itemsPerRow: CGFloat = 2
+    private let numOfSects = 2
+    private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
+    private(set) var movies = [Movie]()
+    private let reuseIdentifier = "movcell"
+    private let collectionLayout = MoviesListFlowLayout()
+    
+    private(set) var isPrefetching = false
+    private(set) var currentPage = 0 {
+        didSet {
+            if currentPage == 0 {
+                currentPage += 1
+            }
+            
+            
+            let request = MoviesList.Fetch.Request(page: currentPage, limit: 0)
+            interactor?.fetchPopularMovies(request: request)
+        }
+    }
+    private(set) var isPrefetchingDisabled = false
+    
+    private(set) var viewState: ViewState = .loading {
+        didSet {
+            switch viewState {
+            case .loaded:
+                DispatchQueue.main.async {
+                    self.loadingIndicator.stopAnimating()
+                    self.collectionView.isHidden = false
+                }
+                break
+            case .loading:
+                DispatchQueue.main.async {
+                    self.loadingIndicator.startAnimating()
+                    self.collectionView.isHidden = true
+                }
+                break
+            case .empty:
+                DispatchQueue.main.async {
+                    self.loadingIndicator.stopAnimating()
+                    self.collectionView.isHidden = true
+                }
+                break
+            }
+        }
+    }
+    
     // MARK: Initializers
     
     init(configurator: MoviesListConfigurator = MoviesListConfigurator.shared) {
         super.init(nibName: nil, bundle: nil)
         
         configurator.configure(viewController: self)
+        
+        collectionView.register(MoviesCollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.prefetchDataSource = self
+        collectionView.collectionViewLayout = collectionLayout
+        
+        setUpSubViews()
+        setUpConstraints()
         
     }
     
@@ -65,23 +112,25 @@ class MoviesListViewController: UIViewController {
         MoviesListConfigurator.shared.configure(viewController: self)
     }
     
+    deinit {
+        //interactor?.cancelAllDownloads()
+        //To Do
+    }
+    
     // MARK: ViewController life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        collectionView.register(MoviesCollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        setUpSubViews()
-        loadingIndicator.startAnimating()
-        interactor?.fetchPopularMovies(request: MoviesList.Fetch.Request.init(page: 1, limit: 0))
-
+        currentPage = 1
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
         navigationController?.navigationBar.shadowImage = UIImage()
+        if viewState != .loaded {
+            viewState = .loading
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -98,7 +147,9 @@ class MoviesListViewController: UIViewController {
         view.addSubview(loadingIndicator)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
-        
+    }
+    
+    private func setUpConstraints() {
         NSLayoutConstraint.activate([
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -120,16 +171,16 @@ class MoviesListViewController: UIViewController {
 // MARK: - MoviesListDisplayLogic
 
 extension MoviesListViewController: MoviesListDisplayLogic {
-    func showEmptyStateIfNeeded() {
-        DispatchQueue.main.async {
-            self.loadingIndicator.stopAnimating()
-        }
-    }
     
     func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel) {
+        isPrefetching = false
+        guard !(currentPage > 1 && viewModel.movies.isEmpty) else {
+            isPrefetchingDisabled = true
+            return
+        }
         movies.append(contentsOf: viewModel.movies)
+        viewState = movies.isEmpty ? .empty : .loaded
         DispatchQueue.main.async {
-            self.loadingIndicator.stopAnimating()
             self.collectionView.reloadData()
         }
     }
@@ -201,6 +252,22 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return sectionInsets.left
+    }
+    
+}
+
+// MARK: UITableViewDataSourcePrefetching
+extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        guard !isPrefetching && !isPrefetchingDisabled else { return }
+        
+        let fetchMovies = indexPaths.contains { (($0.section * 2) + 3) >= movies.count }
+        
+        if fetchMovies {
+            isPrefetching = true
+            currentPage += 1
+        }
     }
     
 }
