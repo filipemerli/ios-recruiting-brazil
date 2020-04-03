@@ -8,31 +8,30 @@
 
 import Foundation
 
-final class MoviesAPIClient {
-    private lazy var corpoURL: URL = {
-        return URL(string: "https://api.themoviedb.org/3/")!
+public enum MoviesApiClientResponse<T> {
+    case success(T)
+    case error(Error)
+}
+
+class MoviesAPIClient: ApiClient {
+    
+    static var shared: MoviesAPIClient = {
+        let config = URLSessionConfiguration.default
+        config.httpAdditionalHeaders = [
+            "Content-Type" : "application/json",
+            "Accept" : "application/json"
+        ]
+        config.requestCachePolicy = .useProtocolCachePolicy
+        return MoviesAPIClient(configuration: config)
     }()
     
-    let session: URLSession
     let defaultParameters = ["api_key" : "6009379178c6cf65ffc7468b6598440f", "language" : "pt-BR"]
-    let path = "movie/popular"
-    let pathGen = "genre/movie/list"
-    let pathSearch = "search/movie"
-    
-    init(session: URLSession = URLSession.shared) {
-        self.session = session
-    }
     
     func fetchPopularMovies(page: Int, completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
-        var urlRequest = URLRequest(url: corpoURL.appendingPathComponent(path))
+        let url = Endpoints<MoviesAPIClient>.popularMovies.url
         let parameters = ["page": "\(page)"].merging(defaultParameters, uniquingKeysWith: +)
-        var urlComponents = URLComponents(url: urlRequest.url!, resolvingAgainstBaseURL: false)
-        let queryItems = parameters.map { key, value in
-                URLQueryItem(name: key, value: value)
-        }
-        urlComponents?.queryItems = queryItems
-        urlRequest.url = urlComponents?.url
-        session.dataTask(with: urlRequest, completionHandler: { data, response, error in
+        let request = buildRequest(.get, url: url, parameters: parameters)
+        session.dataTask(with: request, completionHandler: { data, response, error in
             guard
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
@@ -49,14 +48,9 @@ final class MoviesAPIClient {
     }
     
     func fetchMoviesGenres(completion: @escaping (Result<GenresResponse, ResponseError>) -> Void) {
-        var urlRequest = URLRequest(url: corpoURL.appendingPathComponent(pathGen))
-        var urlComponents = URLComponents(url: urlRequest.url!, resolvingAgainstBaseURL: false)
-        let queryItems = defaultParameters.map { key, value in
-            URLQueryItem(name: key, value: value)
-        }
-        urlComponents?.queryItems = queryItems
-        urlRequest.url = urlComponents?.url
-        session.dataTask(with: urlRequest, completionHandler: { data, response, error in
+        let url = Endpoints<MoviesAPIClient>.genders.url
+        let request = buildRequest(.get, url: url, parameters: defaultParameters)
+        session.dataTask(with: request, completionHandler: { data, response, error in
             guard
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
@@ -73,15 +67,10 @@ final class MoviesAPIClient {
     }
     
     func fetchSearchMovie(text: String, completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
-        var urlRequest = URLRequest(url: corpoURL.appendingPathComponent(pathSearch))
+        let url = Endpoints<MoviesAPIClient>.searchMovies.url
         let parameters = ["query": text].merging(defaultParameters, uniquingKeysWith: +)
-        var urlComponents = URLComponents(url: urlRequest.url!, resolvingAgainstBaseURL: false)
-        let queryItems = parameters.map { key, value in
-                URLQueryItem(name: key, value: value)
-        }
-        urlComponents?.queryItems = queryItems
-        urlRequest.url = urlComponents?.url
-        session.dataTask(with: urlRequest, completionHandler: { data, response, error in
+        let request = buildRequest(.get, url: url, parameters: parameters)
+        session.dataTask(with: request, completionHandler: { data, response, error in
             guard
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
@@ -95,6 +84,30 @@ final class MoviesAPIClient {
             }
             completion(Result.success(decodedResponse))
         }).resume()
+    }
+    
+    func fetchMovies(page: Int, _ completion: @escaping (MoviesApiClientResponse<MoviesResponse>) -> Void) {
+        let url = Endpoints<MoviesAPIClient>.popularMovies.url
+        let parameters = ["page": "\(page)"].merging(defaultParameters, uniquingKeysWith: +)
+        let request = buildRequest(.get, url: url, parameters: parameters)
+        session.dataTask(with: request, completionHandler: { data, response, error in
+            guard
+                let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
+                let data = data
+                else {
+                    completion(MoviesApiClientResponse.error(ResponseError.rede))
+                    return
+            }
+            guard let decodedResponse = try? JSONDecoder().decode(MoviesResponse.self, from: data) else {
+                completion(MoviesApiClientResponse.error(ResponseError.decoding))
+                return
+            }
+            completion(MoviesApiClientResponse.success(decodedResponse))
+        }).resume()
+    }
+    
+    override class var baseURL: String {
+        return "https://api.themoviedb.org/3/"
     }
     
 }

@@ -22,7 +22,7 @@ class MainTabBarViewController: UITabBarController {
     private func configView() {
         self.tabBar.barTintColor = ColorSystem.cYellowDark
         self.tabBar.tintColor = ColorSystem.cBlueDark
-        let moviesCollectionViewController = MoviesCollectionCollectionViewController(collectionViewLayout: MoviesListFlowLayout())
+        let moviesCollectionViewController = MoviesListViewController()
         let tabBar1 = UITabBarItem(title: "Movies", image: #imageLiteral(resourceName: "list_icon"), tag: 0)
         moviesCollectionViewController.tabBarItem = tabBar1
         let favoritesTableViewController = FavoritesTableViewController()

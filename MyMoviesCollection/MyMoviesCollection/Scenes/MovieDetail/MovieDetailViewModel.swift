@@ -29,7 +29,7 @@ final class MovieDetailViewModel {
     private var genresAppended: String = ""
     private var isFetchInProgress = false
     
-    let client = MoviesAPIClient()
+    let client = MoviesAPIClient.shared
     
     // MARK: - Class Functions
     

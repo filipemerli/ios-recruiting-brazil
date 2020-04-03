@@ -28,7 +28,7 @@ final class MoviesViewModel {
     private var total = 0
     private var isFetchInProgress = false
     
-    let client = MoviesAPIClient()
+    let client = MoviesAPIClient.shared
     
     private var totalCount: Int {
         return total

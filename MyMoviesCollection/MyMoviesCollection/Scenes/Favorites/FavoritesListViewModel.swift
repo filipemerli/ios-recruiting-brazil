@@ -65,13 +65,11 @@ final class FavoritesListViewModel {
     public func deleteFavorite(line: Int, completion: @escaping(_ result: Bool) -> Void) {
         let idToDelete = favMovies[line].id
         let dataManager = PersistanceManager()
-        do {
-            let results = try dataManager.deleteFavorite(id: idToDelete)
-            
+        if dataManager.deleteFavorite(id: idToDelete) {
             favMovies.remove(at: line)
             PersistanceService.saveContext()
             completion(true)
-        } catch {
+        } else {
             completion(false)
         }
     }

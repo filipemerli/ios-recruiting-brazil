@@ -198,7 +198,7 @@ class MovieDetailViewController: UIViewController, Alerts {
             case .success(let response):
                 DispatchQueue.main.async {
                     self.loadingIndicator.stopAnimating()
-                    self.imageView.image = response.banner
+                    self.imageView.image = response
                 }
             }
         })
