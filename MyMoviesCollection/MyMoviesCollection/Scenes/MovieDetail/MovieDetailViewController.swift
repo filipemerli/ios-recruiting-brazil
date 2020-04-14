@@ -8,6 +8,10 @@
 
 import UIKit
 
+protocol MovieDetailDisplayLogic: class {
+    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.ViewModel)
+}
+
 class MovieDetailViewController: UIViewController, Alerts {
     
     // MARK: - Properties
@@ -70,18 +74,31 @@ class MovieDetailViewController: UIViewController, Alerts {
         return ind
     }()
     
-    private var viewModel: MovieDetailViewModel?
     public var movieToPresent: Movie?
     private var isFavorite: Bool = false
+    var router: (NSObjectProtocol & MovieDetailRoutingLogic & MovieDetailDataPassing)?
+    var interactor: MovieDetailBusinessLogic?
 
+    // MARK: Initializers
+    
+    init(configurator: MovieDetailConfigurator = MovieDetailConfigurator.shared) {
+        super.init(nibName: nil, bundle: nil)
+        
+        configurator.configure(viewController: self)
+        
+        setUpSubViews()
+        setUpConstraints()
+        
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        MovieDetailConfigurator.shared.configure(viewController: self)    }
+    
     // MARK: - ViewController life cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUpView()
-        setMovieDetails()
-        viewModel = MovieDetailViewModel(delegate: self)
-        viewModel?.fetchMovieDetail()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -92,16 +109,18 @@ class MovieDetailViewController: UIViewController, Alerts {
         setUpBorders()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setMovieDetails()
+    }
+    
     deinit {
-        guard viewModel != nil else {
-            return
-        }
-        viewModel = nil
+        
     }
     
     // MARK: - Class Functions
     
-    private func setUpView() {
+    private func setUpSubViews() {
         self.view.backgroundColor = .white
         view.addSubview(imageView)
         view.addSubview(infosView)
@@ -111,45 +130,41 @@ class MovieDetailViewController: UIViewController, Alerts {
         infosView.addSubview(overview)
         infosView.addSubview(favButton)
         imageView.addSubview(loadingIndicator)
-        
-        imageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20).isActive = true
-        imageView.bottomAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15).isActive = true
-        imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15).isActive = true
-        
-        infosView.topAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        infosView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        infosView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15).isActive = true
-        infosView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15).isActive = true
-        
-        titleLabel.topAnchor.constraint(equalTo: infosView.topAnchor).isActive = true
-        titleLabel.trailingAnchor.constraint(equalTo: infosView.trailingAnchor, constant: -45).isActive = true
-        titleLabel.leadingAnchor.constraint(equalTo: infosView.leadingAnchor).isActive = true
-        titleLabel.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        
-        yearLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor).isActive = true
-        yearLabel.trailingAnchor.constraint(equalTo: infosView.trailingAnchor).isActive = true
-        yearLabel.leadingAnchor.constraint(equalTo: infosView.leadingAnchor).isActive = true
-        yearLabel.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        
-        genres.topAnchor.constraint(equalTo: yearLabel.bottomAnchor).isActive = true
-        genres.trailingAnchor.constraint(equalTo: infosView.trailingAnchor).isActive = true
-        genres.leadingAnchor.constraint(equalTo: infosView.leadingAnchor).isActive = true
-        genres.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        
-        overview.topAnchor.constraint(equalTo: genres.bottomAnchor).isActive = true
-        overview.trailingAnchor.constraint(equalTo: infosView.trailingAnchor).isActive = true
-        overview.leadingAnchor.constraint(equalTo: infosView.leadingAnchor).isActive = true
-        overview.bottomAnchor.constraint(equalTo: infosView.bottomAnchor).isActive = true
-        
-        favButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor).isActive = true
-        favButton.trailingAnchor.constraint(equalTo: infosView.trailingAnchor).isActive = true
-        favButton.widthAnchor.constraint(equalToConstant: 45).isActive = true
-        favButton.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        
-        loadingIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
-        loadingIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor).isActive = true
-        
+    }
+    
+    private func setUpConstraints() {
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 20),
+            imageView.bottomAnchor.constraint(equalTo: view.centerYAnchor),
+            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            infosView.topAnchor.constraint(equalTo: view.centerYAnchor),
+            infosView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            infosView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15),
+            infosView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15),
+            titleLabel.topAnchor.constraint(equalTo: infosView.topAnchor),
+            titleLabel.trailingAnchor.constraint(equalTo: infosView.trailingAnchor, constant: -45),
+            titleLabel.leadingAnchor.constraint(equalTo: infosView.leadingAnchor),
+            titleLabel.heightAnchor.constraint(equalToConstant: 45),
+            yearLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            yearLabel.trailingAnchor.constraint(equalTo: infosView.trailingAnchor),
+            yearLabel.leadingAnchor.constraint(equalTo: infosView.leadingAnchor),
+            yearLabel.heightAnchor.constraint(equalToConstant: 45),
+            genres.topAnchor.constraint(equalTo: yearLabel.bottomAnchor),
+            genres.trailingAnchor.constraint(equalTo: infosView.trailingAnchor),
+            genres.leadingAnchor.constraint(equalTo: infosView.leadingAnchor),
+            genres.heightAnchor.constraint(equalToConstant: 45),
+            overview.topAnchor.constraint(equalTo: genres.bottomAnchor),
+            overview.trailingAnchor.constraint(equalTo: infosView.trailingAnchor),
+            overview.leadingAnchor.constraint(equalTo: infosView.leadingAnchor),
+            overview.bottomAnchor.constraint(equalTo: infosView.bottomAnchor),
+            favButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            favButton.trailingAnchor.constraint(equalTo: infosView.trailingAnchor),
+            favButton.widthAnchor.constraint(equalToConstant: 45),
+            favButton.heightAnchor.constraint(equalToConstant: 45),
+            loadingIndicator.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
+            loadingIndicator.centerXAnchor.constraint(equalTo: imageView.centerXAnchor)
+        ])
     }
     
     private func setUpFavButton() {
@@ -159,17 +174,9 @@ class MovieDetailViewController: UIViewController, Alerts {
     }
     
     private func checkIfFavorite() {
-        guard let idFavorite = movieToPresent?.id else {
-            return
-        }
-        viewModel?.checkIfFavorite(id: idFavorite, completion: { result in
-            if result {
-                self.isFavorite = true
-            } else {
-                self.isFavorite = false
-            }
-            self.updateFavButtonFeedback()
-        })
+
+        //To Do
+        
     }
     
     private func updateFavButtonFeedback() {
@@ -187,6 +194,7 @@ class MovieDetailViewController: UIViewController, Alerts {
     }
     
     private func setMovieDetails() {
+        movieToPresent = router?.dataStore?.movie
         guard let movieUrl = movieToPresent?.posterUrl else { return }
         LoadImageWithCache.shared.downloadMovieAPIImage(posterUrl: movieUrl, completion: { result in
             switch result {
@@ -214,32 +222,18 @@ class MovieDetailViewController: UIViewController, Alerts {
             guard let movie = movieToPresent else {
                 return
             }
-            viewModel?.favoriteMovie(movie: movie, completion: { (success) in
-                self.isFavorite = true
-                self.favButton.isSelected = true
-                NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
-            })
+            // To Do
+            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         }
     }
     
 }
 
-// MARK: - MovieDetailViewModelDelegate
+// MARK: - MovieDetailDisplayLogic
 
-extension MovieDetailViewController: MovieDetailViewModelDelegate {
-    func fetchGenresCompleted() {
-        guard let movieGens = movieToPresent?.generedIds else { return }
-        DispatchQueue.main.async {
-            self.genres.text = self.viewModel?.findGens(genIds: movieGens)
-            self.loadingIndicator.stopAnimating()
-        }
+extension MovieDetailViewController: MovieDetailDisplayLogic {
+    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.ViewModel) {
+        // To Do
     }
     
-    func fetchGenresFailed(with reason: String) {
-        DispatchQueue.main.async {
-            self.loadingIndicator.stopAnimating()
-        }
-        let action = UIAlertAction(title: "OK", style: .default)
-        displayAlert(with: "Alerta" , message: reason, actions: [action])
-    }
 }

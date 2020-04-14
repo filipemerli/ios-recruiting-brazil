@@ -47,7 +47,7 @@ class MoviesAPIClient: ApiClient {
         }).resume()
     }
     
-    func fetchMoviesGenres(completion: @escaping (Result<GenresResponse, ResponseError>) -> Void) {
+    func fetchMoviesGenres(_ completion: @escaping (MoviesApiClientResponse<GenresResponse>) -> Void) {
         let url = Endpoints<MoviesAPIClient>.genders.url
         let request = buildRequest(.get, url: url, parameters: defaultParameters)
         session.dataTask(with: request, completionHandler: { data, response, error in
@@ -55,14 +55,14 @@ class MoviesAPIClient: ApiClient {
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
                 else {
-                    completion(Result.failure(ResponseError.rede))
+                    completion(MoviesApiClientResponse.error(ResponseError.rede))
                     return
             }
             guard let decodedResponse = try? JSONDecoder().decode(GenresResponse.self, from: data) else {
-                completion(Result.failure(ResponseError.decoding))
+                completion(MoviesApiClientResponse.error(ResponseError.decoding))
                 return
             }
-            completion(Result.success(decodedResponse))
+            completion(MoviesApiClientResponse.success(decodedResponse))
         }).resume()
     }
     

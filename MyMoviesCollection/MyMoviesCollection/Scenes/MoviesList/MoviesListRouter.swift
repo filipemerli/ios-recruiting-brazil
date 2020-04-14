@@ -9,7 +9,7 @@
 import Foundation
 
 @objc protocol MoviesListRoutingLogic {
-  func navigateToDetail(source: MoviesListViewController, destination: MovieDetailViewController)
+    func routeToDetail(source: MoviesListViewController)
 }
 
 protocol MoviesListDataPassing {
@@ -17,16 +17,30 @@ protocol MoviesListDataPassing {
 }
 
 class MoviesListRouter: NSObject, MoviesListRoutingLogic, MoviesListDataPassing {
-  
+    
     weak var viewController: MoviesListViewController?
     var dataStore: MoviesListDataStore?
+    
+    // MARK: Routing
+    
+    func routeToDetail(source: MoviesListViewController) {
+        let destinationVC = MovieDetailViewController()
+        var destinationDS = destinationVC.router!.dataStore!
+        passDataToDetail(source: dataStore!, destination: &destinationDS)
+        navigateToDetail(source: source, destination: destinationVC)
+    }
+    
+    // MARK: Navigation
     
     func navigateToDetail(source: MoviesListViewController, destination: MovieDetailViewController) {
         source.show(destination, sender: nil)
     }
     
-//    func passDataToSomewhere(source: MoviesListDataStore, destination: inout MoviesDetailDataStore) {
-//      destination.name = source.name
-//    }
+    // MARK: Passing data
+    
+    func passDataToDetail(source: MoviesListDataStore, destination: inout MovieDetailDataStore) {
+        guard let selectedMovie = viewController?.movieToPresent else { return } // TO DO: ERROR
+        destination.movie = selectedMovie
+    }
     
 }

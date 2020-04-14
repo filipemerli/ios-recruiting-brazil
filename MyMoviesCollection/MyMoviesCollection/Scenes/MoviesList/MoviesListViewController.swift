@@ -9,7 +9,7 @@
 import UIKit
 
 protocol MoviesListDisplayLogic: class {
-    func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel)
+    func renderMoviesList(viewModel: MoviesList.FetchMovies.ViewModel)
 }
 
 class MoviesListViewController: UIViewController {
@@ -49,16 +49,15 @@ class MoviesListViewController: UIViewController {
     private(set) var movies = [Movie]()
     private let reuseIdentifier = "movcell"
     private let collectionLayout = MoviesListFlowLayout()
+    public var movieToPresent: Movie?
     
     private(set) var isPrefetching = false
     private(set) var currentPage = 0 {
         didSet {
             if currentPage == 0 {
                 currentPage += 1
-            }
-            
-            
-            let request = MoviesList.Fetch.Request(page: currentPage, limit: 0)
+            }            
+            let request = MoviesList.FetchMovies.RequestMovies(page: currentPage)
             interactor?.fetchPopularMovies(request: request)
         }
     }
@@ -102,6 +101,8 @@ class MoviesListViewController: UIViewController {
         collectionView.prefetchDataSource = self
         collectionView.collectionViewLayout = collectionLayout
         
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
+        
         setUpSubViews()
         setUpConstraints()
         
@@ -113,6 +114,7 @@ class MoviesListViewController: UIViewController {
     }
     
     deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         //interactor?.cancelAllDownloads()
         //To Do
     }
@@ -165,6 +167,12 @@ class MoviesListViewController: UIViewController {
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
         ])
     }
+    
+    @objc func reloadCollection() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
 
 }
 
@@ -172,7 +180,7 @@ class MoviesListViewController: UIViewController {
 
 extension MoviesListViewController: MoviesListDisplayLogic {
     
-    func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel) {
+    func renderMoviesList(viewModel: MoviesList.FetchMovies.ViewModel) {
         isPrefetching = false
         guard !(currentPage > 1 && viewModel.movies.isEmpty) else {
             isPrefetchingDisabled = true
@@ -197,10 +205,12 @@ extension MoviesListViewController: UICollectionViewDelegate {
             } else{
                 cellIndex = ((indexPath.section * Int(itemsPerRow)) + 1)
             }
-            let movieToPresent = movies[cellIndex]
-            let detailViewController = MovieDetailViewController()
-            detailViewController.movieToPresent = movieToPresent
-            navigationController?.pushViewController(detailViewController, animated: true)
+        movieToPresent = movies[cellIndex]
+        guard movieToPresent != nil else {
+            showErrorAlert(with: "Filme vazio")
+            return
+        }
+        router?.routeToDetail(source: self)
     }
 }
 

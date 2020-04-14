@@ -58,7 +58,8 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        addViews()
+        setUpSubViews()
+        setUpConstraints()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -72,7 +73,7 @@ class MoviesCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Class Functions
     
-    private func addViews(){
+    fileprivate func setUpSubViews(){
         backgroundColor = ColorSystem.cBlueDark
         contentView.addSubview(bannerView)
         bannerView.addSubview(activityIndicator)
@@ -80,29 +81,31 @@ class MoviesCollectionViewCell: UICollectionViewCell {
         infosView.addSubview(titleText)
         infosView.addSubview(favoriteButton)
         
-        bannerView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-        bannerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        bannerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-        bannerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -60).isActive = true
+    }
+    
+    fileprivate func setUpConstraints() {
+        NSLayoutConstraint.activate([
+            bannerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            bannerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            bannerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bannerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            bannerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -60),
+            activityIndicator.centerYAnchor.constraint(equalTo: bannerView.centerYAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: bannerView.centerXAnchor),
+            infosView.topAnchor.constraint(equalTo: bannerView.bottomAnchor),
+            infosView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            infosView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            infosView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            titleText.topAnchor.constraint(equalTo: infosView.topAnchor, constant: 5),
+            titleText.leadingAnchor.constraint(equalTo: infosView.leadingAnchor, constant: 3),
+            titleText.trailingAnchor.constraint(equalTo: infosView.trailingAnchor, constant: -30),
+            titleText.bottomAnchor.constraint(equalTo: infosView.bottomAnchor, constant: -5),
+            favoriteButton.centerYAnchor.constraint(equalTo: infosView.centerYAnchor),
+            favoriteButton.trailingAnchor.constraint(equalTo: infosView.trailingAnchor),
+            favoriteButton.widthAnchor.constraint(equalToConstant: 35.0),
+            favoriteButton.heightAnchor.constraint(equalToConstant: 35.0)
+        ])
         
-        activityIndicator.centerYAnchor.constraint(equalTo: bannerView.centerYAnchor).isActive = true
-        activityIndicator.centerXAnchor.constraint(equalTo: bannerView.centerXAnchor).isActive = true
-        
-        infosView.topAnchor.constraint(equalTo: bannerView.bottomAnchor).isActive = true
-        infosView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
-        infosView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
-        infosView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-        
-        titleText.topAnchor.constraint(equalTo: infosView.topAnchor, constant: 5).isActive = true
-        titleText.leadingAnchor.constraint(equalTo: infosView.leadingAnchor, constant: 3).isActive = true
-        titleText.trailingAnchor.constraint(equalTo: infosView.trailingAnchor, constant: -30).isActive = true
-        titleText.bottomAnchor.constraint(equalTo: infosView.bottomAnchor, constant: -5).isActive = true
-        
-        favoriteButton.centerYAnchor.constraint(equalTo: infosView.centerYAnchor).isActive = true
-        favoriteButton.trailingAnchor.constraint(equalTo: infosView.trailingAnchor).isActive = true
-        favoriteButton.widthAnchor.constraint(equalToConstant: 35.0).isActive = true
-        favoriteButton.heightAnchor.constraint(equalToConstant: 35.0).isActive = true
-
     }
     
     public func setCell(with movie: Movie?) {

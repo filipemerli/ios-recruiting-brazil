@@ -9,15 +9,15 @@
 import Foundation
 
 protocol MoviesListPresentationLogic {
-    func showMoviesList(response: MoviesList.Fetch.Response)
+    func showMoviesList(response: MoviesList.FetchMovies.ResponseMovies)
     func showError(withMessage message: String)
 }
 
 class MoviesListPresenter: MoviesListPresentationLogic {
     weak var viewController: (MoviesListViewController)?
     
-    func showMoviesList(response: MoviesList.Fetch.Response) {
-        let viewModel = MoviesList.Fetch.ViewModel(movies: response.movies)
+    func showMoviesList(response: MoviesList.FetchMovies.ResponseMovies) {
+        let viewModel = MoviesList.FetchMovies.ViewModel(movies: response.movies)
         viewController?.renderMoviesList(viewModel: viewModel)
     }
     

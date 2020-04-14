@@ -15,6 +15,7 @@ struct Movie: Decodable {
     let overview: String?
     let releaseDate: String?
     let generedIds: [Int?]
+    let isFavorite: Bool?
     
     enum CodingKeys: String, CodingKey {
         case title = "original_title"
@@ -23,15 +24,17 @@ struct Movie: Decodable {
         case overview
         case releaseDate = "release_date"
         case generedIds = "genre_ids"
+        case isFavorite
     }
     
-    init(title: String, id: Int32, posterUrl: String, overview: String, releaseDate: String, generedIds: [Int]) {
+    init(title: String, id: Int32, posterUrl: String, overview: String, releaseDate: String, generedIds: [Int], isFavorite: Bool) {
         self.title = title
         self.id = id
         self.posterUrl = posterUrl
         self.overview = overview
         self.releaseDate = String(releaseDate.prefix(4))
         self.generedIds = generedIds
+        self.isFavorite = false
     }
     
     init(from decoder: Decoder) throws {
@@ -42,7 +45,8 @@ struct Movie: Decodable {
         let overview = (try? container.decode(String.self, forKey: .overview)) ?? ""
         let releaseDate = (try? container.decode(String.self, forKey: .releaseDate)) ?? ""
         let generedIds = (try? container.decode([Int].self, forKey: .generedIds)) ?? []
-        self.init(title: title, id: id, posterUrl: posterUrl, overview: overview, releaseDate: releaseDate, generedIds: generedIds)
+        let isFavorite = false
+        self.init(title: title, id: id, posterUrl: posterUrl, overview: overview, releaseDate: releaseDate, generedIds: generedIds, isFavorite: isFavorite)
     }
     
 }

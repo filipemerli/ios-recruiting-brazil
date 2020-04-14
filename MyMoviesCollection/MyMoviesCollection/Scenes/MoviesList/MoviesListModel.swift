@@ -10,16 +10,24 @@ import UIKit
 
 enum MoviesList {
     
-    enum Fetch {
-        struct Request {
+    enum FetchMovies {
+        struct RequestMovies {
             let page: Int
             
-            init(page: Int, limit: Int) {
+            init(page: Int) {
                 self.page = page
             }
         }
         
-        struct Response {
+        struct RequestFavorite {
+            let id: Int
+            
+            init(id: Int) {
+                self.id = id
+            }
+        }
+        
+        struct ResponseMovies {
             let movies: [Movie]
             let total: Int
             
