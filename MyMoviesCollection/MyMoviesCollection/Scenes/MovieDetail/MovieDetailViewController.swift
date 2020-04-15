@@ -13,7 +13,6 @@ protocol MovieDetailDisplayLogic: class {
     func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.MovieGenres)
     func renderMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner)
     func renderFavoriteButtonFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback)
-    //func checkIfFavorite(viewModel: MovieDetail.ShowMovieDetail.)
 }
 
 class MovieDetailViewController: UIViewController, Alerts {
@@ -89,12 +88,9 @@ class MovieDetailViewController: UIViewController, Alerts {
     
     init(configurator: MovieDetailConfigurator = MovieDetailConfigurator.shared) {
         super.init(nibName: nil, bundle: nil)
-        
         configurator.configure(viewController: self)
-        
         setUpSubViews()
         setUpConstraints()
-        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -120,10 +116,6 @@ class MovieDetailViewController: UIViewController, Alerts {
         interactor?.fetchMovieDetails()
         interactor?.fetchMovieGenres()
         interactor?.fetchBannerImage()
-    }
-    
-    deinit {
-        
     }
     
     // MARK: - Class Functions
@@ -214,7 +206,6 @@ extension MovieDetailViewController: MovieDetailDisplayLogic {
         }
     }
     
-    
     func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.MovieGenres) {
         DispatchQueue.main.async {
             self.genres.text = viewModel.genres
@@ -240,9 +231,5 @@ extension MovieDetailViewController: MovieDetailDisplayLogic {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         }
     }
-    
-//    func checkIfFavorite() {
-//        // To Do
-//    }
     
 }

@@ -44,6 +44,5 @@ enum MovieDetail {
             }
         }
         
-        
     }
 }

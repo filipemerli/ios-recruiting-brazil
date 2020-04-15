@@ -69,12 +69,12 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     
     func fetchMovieDetails() {
         guard let showMovie = movie else {
-            presenter?.showError(withMessage: "Filme vazio")
+            presenter?.showError(withMessage: "Filme vazio.")
             return
         }
         self.presenter?.showMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel(movie: showMovie))
         guard let movieId = movie?.id else {
-            presenter?.showError(withMessage: "Não foi possível verificar se o filme é favorito")
+            presenter?.showError(withMessage: "Não foi possível verificar se o filme é favorito.")
             return
         }
         worker?.checkIfFavorite(movieId: movieId, { success in
@@ -86,7 +86,10 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     // MARK: - Fetch Banner Image
     
     func fetchBannerImage() {
-        guard let bannerUrl = movie?.posterUrl else { return }
+        guard let bannerUrl = movie?.posterUrl else {
+            presenter?.showError(withMessage: "Não foi possível obter a imagem do poster deste filme.")
+            return
+        }
         worker?.fetchBanner(posterUrl: bannerUrl, { resultBanner in
             switch resultBanner {
             case .error(let errorBanner):
@@ -99,14 +102,14 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     
     func favoriteMovie() {
         guard let movieToSave = movie else {
-            self.presenter?.showError(withMessage: "Filme vazio")
+            self.presenter?.showError(withMessage: "Filme vazio.")
             return
         }
         worker?.favoriteMovie(movie: movieToSave, { success in
             if success {
                 self.presenter?.showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
             } else {
-                self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente")
+                self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente.")
             }
         })
     }

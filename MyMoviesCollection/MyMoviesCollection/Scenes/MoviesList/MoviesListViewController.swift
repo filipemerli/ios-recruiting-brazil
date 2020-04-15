@@ -92,17 +92,13 @@ class MoviesListViewController: UIViewController {
     
     init(configurator: MoviesListConfigurator = MoviesListConfigurator.shared) {
         super.init(nibName: nil, bundle: nil)
-        
         configurator.configure(viewController: self)
-        
         collectionView.register(MoviesCollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.prefetchDataSource = self
         collectionView.collectionViewLayout = collectionLayout
-        
         NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
-        
         setUpSubViews()
         setUpConstraints()
         
@@ -115,8 +111,7 @@ class MoviesListViewController: UIViewController {
     
     deinit {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
-        //interactor?.cancelAllDownloads()
-        //To Do
+        //interactor?.cancelAllDownloads() - To Do
     }
     
     // MARK: ViewController life cycle
@@ -199,12 +194,7 @@ extension MoviesListViewController: MoviesListDisplayLogic {
 
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        var cellIndex: Int = 0
-            if (indexPath.row == 0) {
-                cellIndex = (indexPath.section * Int(itemsPerRow))
-            } else{
-                cellIndex = ((indexPath.section * Int(itemsPerRow)) + 1)
-            }
+        let cellIndex = (indexPath.row == 0 ? (indexPath.section * Int(itemsPerRow)) : (indexPath.section * Int(itemsPerRow)) + 1)
         movieToPresent = movies[cellIndex]
         guard movieToPresent != nil else {
             showErrorAlert(with: "Filme vazio")
