@@ -231,10 +231,10 @@
 		A742423F2419DAC100AE94FE /* MoviesList */ = {
 			isa = PBXGroup;
 			children = (
+				A7D19202242A3B860015C5E7 /* MoviesListViewController.swift */,
 				A730E982241AE00A006AD615 /* MoviesListFlowLayout.swift */,
 				A730E988241B037A006AD615 /* MoviesCollectionViewCell.swift */,
 				A7D19200242A37ED0015C5E7 /* MoviesListInteractor.swift */,
-				A7D19202242A3B860015C5E7 /* MoviesListViewController.swift */,
 				A7D1920C242A8FAB0015C5E7 /* MoviesListConfigurator.swift */,
 				A7D1920E242A985B0015C5E7 /* MoviesListPresenter.swift */,
 				A7D19210242AA3520015C5E7 /* MoviesListRouter.swift */,

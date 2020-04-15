@@ -9,7 +9,10 @@
 import UIKit
 
 protocol MovieDetailDisplayLogic: class {
-    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.ViewModel)
+    func renderMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel)
+    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.MovieGenres)
+    func renderMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner)
+    //func checkIfFavorite(viewModel: MovieDetail.ShowMovieDetail.)
 }
 
 class MovieDetailViewController: UIViewController, Alerts {
@@ -52,6 +55,8 @@ class MovieDetailViewController: UIViewController, Alerts {
     private lazy var genres: UILabel = {
         let gen = UILabel()
         gen.translatesAutoresizingMaskIntoConstraints = false
+        gen.numberOfLines = 1
+        gen.adjustsFontSizeToFitWidth = true
         return gen
     }()
     
@@ -74,7 +79,6 @@ class MovieDetailViewController: UIViewController, Alerts {
         return ind
     }()
     
-    public var movieToPresent: Movie?
     private var isFavorite: Bool = false
     var router: (NSObjectProtocol & MovieDetailRoutingLogic & MovieDetailDataPassing)?
     var interactor: MovieDetailBusinessLogic?
@@ -111,7 +115,9 @@ class MovieDetailViewController: UIViewController, Alerts {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setMovieDetails()
+        interactor?.fetchMovieDetails()
+        interactor?.fetchMovieGenres()
+        interactor?.fetchBannerImage()
     }
     
     deinit {
@@ -169,14 +175,8 @@ class MovieDetailViewController: UIViewController, Alerts {
     
     private func setUpFavButton() {
         favButton.addTarget(self, action: #selector(favoriteMovie), for: .touchUpInside)
-        favButton.isEnabled = false
-        checkIfFavorite()
-    }
-    
-    private func checkIfFavorite() {
-
-        //To Do
-        
+        favButton.isEnabled = true  // TO DO adjust
+        //checkIfFavorite()
     }
     
     private func updateFavButtonFeedback() {
@@ -192,36 +192,13 @@ class MovieDetailViewController: UIViewController, Alerts {
         favButton.layer.addBottomBorders()
         genres.layer.addBottomBorders()
     }
-    
-    private func setMovieDetails() {
-        movieToPresent = router?.dataStore?.movie
-        guard let movieUrl = movieToPresent?.posterUrl else { return }
-        LoadImageWithCache.shared.downloadMovieAPIImage(posterUrl: movieUrl, completion: { result in
-            switch result {
-            case .failure(let error):
-                DispatchQueue.main.async {
-                    self.loadingIndicator.stopAnimating()
-                }
-                debugPrint("Erro ao baixar imagem: \(error.reason)")
-            case .success(let response):
-                DispatchQueue.main.async {
-                    self.loadingIndicator.stopAnimating()
-                    self.imageView.image = response
-                }
-            }
-        })
-        DispatchQueue.main.async {
-            self.yearLabel.text = self.movieToPresent?.releaseDate
-            self.overview.text = self.movieToPresent?.overview
-            self.titleLabel.text = self.movieToPresent?.title
-        }
-    }
-    
+        
     @objc func favoriteMovie(sender: UIButton!) {
         if !isFavorite {
-            guard let movie = movieToPresent else {
-                return
-            }
+            print("Favorite movie")
+//            guard let movie = movieToPresent else {
+//                return
+//            }
             // To Do
             //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         }
@@ -232,8 +209,32 @@ class MovieDetailViewController: UIViewController, Alerts {
 // MARK: - MovieDetailDisplayLogic
 
 extension MovieDetailViewController: MovieDetailDisplayLogic {
-    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.ViewModel) {
-        // To Do
+    
+    func renderMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner) {
+        DispatchQueue.main.async {
+            self.loadingIndicator.stopAnimating()
+            self.imageView.image = viewModel.movieBanner
+        }
     }
+    
+    
+    func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.MovieGenres) {
+        DispatchQueue.main.async {
+            self.genres.text = viewModel.genres
+        }
+    }
+    
+    func renderMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel) {
+        let movieToPresent = viewModel.movie
+        DispatchQueue.main.async {
+            self.yearLabel.text = movieToPresent.releaseDate
+            self.overview.text = movieToPresent.overview
+            self.titleLabel.text = movieToPresent.title
+        }
+    }
+    
+//    func checkIfFavorite() {
+//        // To Do
+//    }
     
 }

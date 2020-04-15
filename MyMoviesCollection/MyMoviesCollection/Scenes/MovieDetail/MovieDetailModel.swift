@@ -19,5 +19,23 @@ enum MovieDetail {
                 self.movie = movie
             }
         }
+        
+        struct MovieBanner {
+            let movieBanner: UIImage
+            
+            init(movieBanner: UIImage) {
+                self.movieBanner = movieBanner
+            }
+        }
+        
+        struct MovieGenres {
+            let genres: String
+            
+            init(genres: String) {
+                self.genres = genres
+            }
+        }
+        
+        
     }
 }

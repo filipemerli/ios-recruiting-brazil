@@ -10,7 +10,7 @@ import Foundation
 
 struct GenresResponse: Decodable {
     
-    let genres: [Genres]
+    let genres: [Genre]
     
     enum CodingKeys: String, CodingKey {
         case genres

@@ -115,14 +115,14 @@ class MoviesCollectionViewCell: UICollectionViewCell {
             guard let posterUrl = movie.posterUrl else {
                 return
             }
-            LoadImageWithCache.shared.downloadMovieAPIImage(posterUrl: posterUrl, completion: { result in
+            LoadImageWithCache.shared.downloadMovieAPIImage(posterUrl: posterUrl, { result in
                 switch result {
-                case .failure(let error):
+                case .error(let error):
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
                         self.bannerView.image = #imageLiteral(resourceName: "placeholder")
                     }
-                    debugPrint("Erro ao baixar imagem: \(error.reason)")
+                    debugPrint("Erro ao baixar imagem: \(error.localizedDescription)")
                 case .success(let response):
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
