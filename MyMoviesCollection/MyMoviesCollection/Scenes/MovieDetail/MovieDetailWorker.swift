@@ -12,10 +12,12 @@ class MovieDetailWorker {
     
     private let apiClient: MoviesAPIClient
     private let loadImage: LoadImageWithCache
+    private let coreData: PersistanceManager
  
-    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared) {
+    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared, coreData: PersistanceManager = PersistanceManager.shared) {
         self.apiClient = apiClient
         self.loadImage = loadImage
+        self.coreData = coreData
     }
     
     func fetchGenres(_ completion: @escaping (MoviesApiClientResponse<GenresResponse>) -> ()) {
@@ -26,4 +28,17 @@ class MovieDetailWorker {
         loadImage.downloadMovieAPIImage(posterUrl: posterUrl, completion)
     }
     
+    func favoriteMovie(movie: Movie, _ completion: @escaping (Bool) -> ()) {
+        do {
+            try coreData.saveFavorite(movie: movie)
+            completion(true)
+        } catch {
+            completion(false)
+        }
+    }
+    
+    func checkIfFavorite(movieId: Int32, _ completion: @escaping (Bool) -> ()) {
+        let result = coreData.checkFavorite(id: movieId)
+        completion(result)
+    }
 }

@@ -12,6 +12,7 @@ protocol MovieDetailPresentationLogic {
     func showMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel)
     func showMovieGenres(viewModel: MovieDetail.ShowMovieDetail.MovieGenres)
     func showMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner)
+    func showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback)
     func showError(withMessage message: String)
 }
 
@@ -31,6 +32,11 @@ class MovieDetailPresenter: MovieDetailPresentationLogic {
     func showMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner) {
         let viewModel = MovieDetail.ShowMovieDetail.MovieBanner(movieBanner: viewModel.movieBanner)
         viewController?.renderMovieBanner(viewModel: viewModel)
+    }
+    
+    func showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback) {
+        let viewModel = MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: viewModel.favButtonFeedback)
+        viewController?.renderFavoriteButtonFeedback(viewModel: viewModel)
     }
     
     func showError(withMessage message: String) {

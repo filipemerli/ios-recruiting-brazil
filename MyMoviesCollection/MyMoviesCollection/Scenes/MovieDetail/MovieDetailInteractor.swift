@@ -12,6 +12,7 @@ protocol MovieDetailBusinessLogic {
     func fetchMovieGenres()
     func fetchMovieDetails()
     func fetchBannerImage()
+    func favoriteMovie()
 }
 
 protocol MovieDetailDataStore {
@@ -67,8 +68,19 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     // MARK: - Show Movie Details
     
     func fetchMovieDetails() {
-        guard let showMovie = movie else { return }
+        guard let showMovie = movie else {
+            presenter?.showError(withMessage: "Filme vazio")
+            return
+        }
         self.presenter?.showMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel(movie: showMovie))
+        guard let movieId = movie?.id else {
+            presenter?.showError(withMessage: "Não foi possível verificar se o filme é favorito")
+            return
+        }
+        worker?.checkIfFavorite(movieId: movieId, { success in
+            self.presenter?.showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
+        })
+        
     }
     
     // MARK: - Fetch Banner Image
@@ -81,6 +93,20 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
                 self.presenter?.showError(withMessage: errorBanner.localizedDescription)
             case .success(let responseBanner):
                 self.presenter?.showMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner(movieBanner: responseBanner))
+            }
+        })
+    }
+    
+    func favoriteMovie() {
+        guard let movieToSave = movie else {
+            self.presenter?.showError(withMessage: "Filme vazio")
+            return
+        }
+        worker?.favoriteMovie(movie: movieToSave, { success in
+            if success {
+                self.presenter?.showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
+            } else {
+                self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente")
             }
         })
     }

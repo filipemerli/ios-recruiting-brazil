@@ -10,6 +10,7 @@ import CoreData
 
 class PersistanceManager {
     
+    static var shared = PersistanceManager()
     let managedObjectContext = PersistanceService.context
     let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FavoriteMovie")
     
@@ -47,9 +48,14 @@ class PersistanceManager {
         }
     }
     
-    public func checkFavorite(id: Int32) throws -> [FavoriteMovie] {
+    public func checkFavorite(id: Int32) -> Bool {
         let predicate = NSPredicate(format: "id == %d", id)
         fetchRequest.predicate = predicate
-        return try (managedObjectContext.fetch(fetchRequest) as? [FavoriteMovie] ?? [])
+        do {
+            let result = try managedObjectContext.fetch(fetchRequest) as? [FavoriteMovie] ?? []
+            return result.count > 0 ? true : false
+        } catch {
+            return false
+        }
     }
 }

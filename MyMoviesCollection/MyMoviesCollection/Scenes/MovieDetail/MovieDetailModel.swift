@@ -36,6 +36,14 @@ enum MovieDetail {
             }
         }
         
+        struct MovieFavButtonFeedback {
+            let favButtonFeedback: Bool
+            
+            init(favButtonFeedback: Bool) {
+                self.favButtonFeedback = favButtonFeedback
+            }
+        }
+        
         
     }
 }

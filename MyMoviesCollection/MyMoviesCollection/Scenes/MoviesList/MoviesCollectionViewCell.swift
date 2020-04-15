@@ -149,16 +149,7 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     private func checkIfFavorite(id: Int32, completion: @escaping(_ result: Bool) -> Void) {
         let dataManager = PersistanceManager()
-        do {
-            let result = try dataManager.checkFavorite(id: id)
-            if result.count > 0 {
-                completion(true)
-            } else {
-            completion(false)
-        }
-        } catch {
-            completion(false)
-        }
+        completion(dataManager.checkFavorite(id: id))
     }
     
 }

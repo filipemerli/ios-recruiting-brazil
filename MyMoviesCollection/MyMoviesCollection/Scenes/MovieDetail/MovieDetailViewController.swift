@@ -12,6 +12,7 @@ protocol MovieDetailDisplayLogic: class {
     func renderMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel)
     func renderMovieGenre(viewModel: MovieDetail.ShowMovieDetail.MovieGenres)
     func renderMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner)
+    func renderFavoriteButtonFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback)
     //func checkIfFavorite(viewModel: MovieDetail.ShowMovieDetail.)
 }
 
@@ -68,6 +69,7 @@ class MovieDetailViewController: UIViewController, Alerts {
         let iconSelected = #imageLiteral(resourceName: "favorite_full_icon")
         btn.setImage(iconSelected, for: .selected)
         btn.imageView?.contentMode = .scaleAspectFit
+        btn.isEnabled = false
         return btn
     }()
     
@@ -195,12 +197,7 @@ class MovieDetailViewController: UIViewController, Alerts {
         
     @objc func favoriteMovie(sender: UIButton!) {
         if !isFavorite {
-            print("Favorite movie")
-//            guard let movie = movieToPresent else {
-//                return
-//            }
-            // To Do
-            //NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
+            interactor?.favoriteMovie()
         }
     }
     
@@ -230,6 +227,17 @@ extension MovieDetailViewController: MovieDetailDisplayLogic {
             self.yearLabel.text = movieToPresent.releaseDate
             self.overview.text = movieToPresent.overview
             self.titleLabel.text = movieToPresent.title
+        }
+    }
+    
+    func renderFavoriteButtonFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback) {
+        favButton.isEnabled = true
+        isFavorite = viewModel.favButtonFeedback
+        DispatchQueue.main.async {
+            self.favButton.isSelected = viewModel.favButtonFeedback
+        }
+        if viewModel.favButtonFeedback {
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         }
     }
     
