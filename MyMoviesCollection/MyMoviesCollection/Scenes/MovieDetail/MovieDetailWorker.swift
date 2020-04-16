@@ -24,7 +24,7 @@ class MovieDetailWorker {
         apiClient.fetchMoviesGenres(completion)
     }
     
-    func fetchBanner(posterUrl: String, _ completion: @escaping (MoviesApiClientResponse<UIImage>) -> ()) {
+    func loadImage(posterUrl: String, _ completion: @escaping (MoviesApiClientResponse<UIImage>) -> ()) {
         loadImage.downloadMovieAPIImage(posterUrl: posterUrl, completion)
     }
     

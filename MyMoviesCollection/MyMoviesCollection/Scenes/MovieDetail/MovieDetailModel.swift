@@ -21,10 +21,10 @@ enum MovieDetail {
         }
         
         struct MovieBanner {
-            let movieBanner: UIImage
+            let image: UIImage
             
-            init(movieBanner: UIImage) {
-                self.movieBanner = movieBanner
+            init(image: UIImage) {
+                self.image = image
             }
         }
         

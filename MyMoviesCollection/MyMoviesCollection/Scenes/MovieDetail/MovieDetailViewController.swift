@@ -202,7 +202,7 @@ extension MovieDetailViewController: MovieDetailDisplayLogic {
     func renderMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner) {
         DispatchQueue.main.async {
             self.loadingIndicator.stopAnimating()
-            self.imageView.image = viewModel.movieBanner
+            self.imageView.image = viewModel.image
         }
     }
     

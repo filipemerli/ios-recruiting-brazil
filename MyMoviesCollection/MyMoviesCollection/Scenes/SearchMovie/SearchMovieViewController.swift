@@ -125,7 +125,7 @@ class SearchMovieViewController: UICollectionViewController, Alerts, UICollectio
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! MoviesCollectionViewCell
         guard let collectionViewModel = viewModel else {
-            cell.setCell(with: .none)
+            //cell.setCell(with: .none)
             return cell
         }
         if collectionViewModel.currentCount > 0 {
@@ -135,9 +135,9 @@ class SearchMovieViewController: UICollectionViewController, Alerts, UICollectio
             } else{
                 cellIndex = ((indexPath.section * 2) + 1)
             }
-            cell.setCell(with: collectionViewModel.movie(at: cellIndex))
+            //cell.setCell(with: collectionViewModel.movie(at: cellIndex))
         } else {
-            cell.setCell(with: .none)
+            //cell.setCell(with: .none)
         }
         return cell
     }

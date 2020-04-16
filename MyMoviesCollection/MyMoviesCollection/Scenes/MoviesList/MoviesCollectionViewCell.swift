@@ -11,10 +11,12 @@ import UIKit
 class MoviesCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Properties
-        
-    private lazy var bannerView: UIImageView = {
-       let view = UIImageView()
+    
+    lazy private var bannerView: UIImageView = {
+        let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.contentMode = .scaleToFill
+        view.clipsToBounds = true
         return view
     }()
     
@@ -51,8 +53,34 @@ class MoviesCollectionViewCell: UICollectionViewCell {
         indicator.translatesAutoresizingMaskIntoConstraints = false
         indicator.hidesWhenStopped = true
         indicator.style = .medium
+        indicator.startAnimating()
         return indicator
     }()
+    
+    var bannerImage: UIImage? {
+        didSet {
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.bannerView.image = self.bannerImage
+            }
+        }
+    }
+    
+    var isFavorite: Bool? {
+        didSet {
+            DispatchQueue.main.async {
+                self.favoriteButton.isSelected = self.isFavorite ?? false
+            }
+        }
+    }
+    
+    var movieTitle: String? {
+        didSet {
+            DispatchQueue.main.async {
+                self.titleText.text = self.movieTitle
+            }
+        }
+    }
     
     // MARK: - Initializer
     
@@ -68,7 +96,8 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        setCell(with: .none)
+        bannerView.image = #imageLiteral(resourceName: "placeholder")
+        favoriteButton.isSelected = false
     }
 
     // MARK: - Class Functions
@@ -106,50 +135,6 @@ class MoviesCollectionViewCell: UICollectionViewCell {
             favoriteButton.heightAnchor.constraint(equalToConstant: 35.0)
         ])
         
-    }
-    
-    public func setCell(with movie: Movie?) {
-        activityIndicator.startAnimating()
-        if let movie = movie {
-            titleText.text = movie.title
-            guard let posterUrl = movie.posterUrl else {
-                return
-            }
-            LoadImageWithCache.shared.downloadMovieAPIImage(posterUrl: posterUrl, { result in
-                switch result {
-                case .error(let error):
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        self.bannerView.image = #imageLiteral(resourceName: "placeholder")
-                    }
-                    debugPrint("Erro ao baixar imagem: \(error.localizedDescription)")
-                case .success(let response):
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        self.bannerView.image = response
-                    }
-                }
-            })
-            guard let id = movie.id else {
-                return
-            }
-            checkIfFavorite(id: id, completion: { result in
-                if result {
-                    DispatchQueue.main.async {
-                        self.favoriteButton.isSelected = true
-                    }
-                }
-            })
-        } else {
-            bannerView.image = #imageLiteral(resourceName: "placeholder")
-            favoriteButton.isSelected = false
-        }
-        
-    }
-    
-    private func checkIfFavorite(id: Int32, completion: @escaping(_ result: Bool) -> Void) {
-        let dataManager = PersistanceManager()
-        completion(dataManager.checkFavorite(id: id))
     }
     
 }

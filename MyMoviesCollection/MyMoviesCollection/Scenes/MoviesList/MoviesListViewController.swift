@@ -9,7 +9,9 @@
 import UIKit
 
 protocol MoviesListDisplayLogic: class {
-    func renderMoviesList(viewModel: MoviesList.FetchMovies.ViewModel)
+    func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel)
+    func renderMovieBanner(viewModel: MoviesList.MovieInfo.ViewModelBanner)
+    func renderFavoriteFeedback(viewModel: MoviesList.MovieInfo.ViewModelFavorite)
 }
 
 class MoviesListViewController: UIViewController {
@@ -57,7 +59,7 @@ class MoviesListViewController: UIViewController {
             if currentPage == 0 {
                 currentPage += 1
             }            
-            let request = MoviesList.FetchMovies.RequestMovies(page: currentPage)
+            let request = MoviesList.Fetch.Request(page: currentPage)
             interactor?.fetchPopularMovies(request: request)
         }
     }
@@ -118,6 +120,7 @@ class MoviesListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.keyboardDismissMode = UIScrollView.KeyboardDismissMode.onDrag
         currentPage = 1
     }
     
@@ -175,7 +178,13 @@ class MoviesListViewController: UIViewController {
 
 extension MoviesListViewController: MoviesListDisplayLogic {
     
-    func renderMoviesList(viewModel: MoviesList.FetchMovies.ViewModel) {
+    func renderFavoriteFeedback(viewModel: MoviesList.MovieInfo.ViewModelFavorite) {
+        if let cell = viewModel.cell as? MoviesCollectionViewCell {
+            cell.isFavorite = viewModel.isFavorite
+        }
+    }
+    
+    func renderMoviesList(viewModel: MoviesList.Fetch.ViewModel) {
         isPrefetching = false
         guard !(currentPage > 1 && viewModel.movies.isEmpty) else {
             isPrefetchingDisabled = true
@@ -185,6 +194,12 @@ extension MoviesListViewController: MoviesListDisplayLogic {
         viewState = movies.isEmpty ? .empty : .loaded
         DispatchQueue.main.async {
             self.collectionView.reloadData()
+        }
+    }
+    
+    func renderMovieBanner(viewModel: MoviesList.MovieInfo.ViewModelBanner) {
+        if let cell = viewModel.cell as? MoviesCollectionViewCell {
+            cell.bannerImage = viewModel.image
         }
     }
     
@@ -212,26 +227,36 @@ extension MoviesListViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! MoviesCollectionViewCell
+        let cell: MoviesCollectionViewCell = {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? MoviesCollectionViewCell else {
+                return MoviesCollectionViewCell()
+            }
+            return cell
+        }()
         guard movies.count > 0 else {
-            cell.setCell(with: .none)
             return cell
         }
         let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
-            cell.setCell(with: movies[cellIndex])
+        cell.movieTitle = movies[cellIndex].title
         return cell
+        
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         if (movies.count > 0) {
-            if (movies.count % Int(itemsPerRow) == 0) {
-                return (movies.count / Int(itemsPerRow))
-            } else{
-                return ((movies.count + 1) / Int(itemsPerRow))
-            }
+            return movies.count % Int(itemsPerRow) == 0 ? (movies.count / Int(itemsPerRow)) : ((movies.count + 1) / Int(itemsPerRow))
         }else {
             return 1
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
+        let movie = movies[cellIndex]
+        let requestBanner = MoviesList.MovieInfo.RequestBanner(cell: cell, posterUrl: movie.posterUrl ?? "https://")
+        let requestFavorite = MoviesList.MovieInfo.RequestFavorite(cell: cell, movieId: movie.id ?? 0)
+        interactor?.fetchBannerImage(request: requestBanner)
+        interactor?.checkIfFavorite(request: requestFavorite)
     }
     
 }

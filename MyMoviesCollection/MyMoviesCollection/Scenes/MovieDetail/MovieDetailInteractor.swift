@@ -30,7 +30,7 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         self.worker = worker
     }
     
-    // MARK: - Get movie genres
+    // MARK:  Fetch movies genres from API    **** TO DO: Save this on Core Data???
     
     func fetchMovieGenres() {
         worker?.fetchGenres() { resultGens in
@@ -40,12 +40,12 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
             case .success(let responseGens):
                 self.genres.append(contentsOf: responseGens.genres)
                 let response = MovieDetail.ShowMovieDetail.MovieGenres(genres: self.findGens(genIds: self.movie?.generedIds ?? [0]))
-                self.presenter?.showMovieGenres(viewModel: response)
+                self.presenter?.showMovieGenres(response: response)
             }
         }
     }
     
-    private func findGens(genIds: [Int?]) -> String {
+    fileprivate func findGens(genIds: [Int?]) -> String {
         var finalGenString = ""
         for i in 0..<genIds.count {
             finalGenString.append(contentsOf: getGenById(from: genIds[i] ?? 0))
@@ -56,7 +56,7 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         return finalGenString
     }
     
-    private func getGenById(from id: Int) -> String {
+    fileprivate func getGenById(from id: Int) -> String {
         for index in 0..<genres.count  {
             if genres[index].id == id {
                 return genres[index].name
@@ -65,40 +65,42 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         return ""
     }
     
-    // MARK: - Show Movie Details
+    // MARK: Check if movie is favorite and present the movie
     
     func fetchMovieDetails() {
         guard let showMovie = movie else {
             presenter?.showError(withMessage: "Filme vazio.")
             return
         }
-        self.presenter?.showMovieDetail(viewModel: MovieDetail.ShowMovieDetail.ViewModel(movie: showMovie))
+        self.presenter?.showMovieDetail(response: MovieDetail.ShowMovieDetail.ViewModel(movie: showMovie))
         guard let movieId = movie?.id else {
             presenter?.showError(withMessage: "Não foi possível verificar se o filme é favorito.")
             return
         }
         worker?.checkIfFavorite(movieId: movieId, { success in
-            self.presenter?.showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
+            self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
         })
         
     }
     
-    // MARK: - Fetch Banner Image
+    // MARK: Load image from API
     
     func fetchBannerImage() {
         guard let bannerUrl = movie?.posterUrl else {
             presenter?.showError(withMessage: "Não foi possível obter a imagem do poster deste filme.")
             return
         }
-        worker?.fetchBanner(posterUrl: bannerUrl, { resultBanner in
+        worker?.loadImage(posterUrl: bannerUrl, { resultBanner in
             switch resultBanner {
-            case .error(let errorBanner):
-                self.presenter?.showError(withMessage: errorBanner.localizedDescription)
-            case .success(let responseBanner):
-                self.presenter?.showMovieBanner(viewModel: MovieDetail.ShowMovieDetail.MovieBanner(movieBanner: responseBanner))
+            case .error(let error):
+                self.presenter?.showError(withMessage: error.localizedDescription)
+            case .success(let image):
+                self.presenter?.showMovieBanner(response: MovieDetail.ShowMovieDetail.MovieBanner(image: image))
             }
         })
     }
+    
+    // MARK: Save movie as favorite
     
     func favoriteMovie() {
         guard let movieToSave = movie else {
@@ -107,7 +109,7 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         }
         worker?.favoriteMovie(movie: movieToSave, { success in
             if success {
-                self.presenter?.showFavoriteFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
+                self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
             } else {
                 self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente.")
             }
