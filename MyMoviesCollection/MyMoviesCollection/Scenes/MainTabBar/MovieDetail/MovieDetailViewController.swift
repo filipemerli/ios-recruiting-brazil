@@ -229,6 +229,7 @@ extension MovieDetailViewController: MovieDetailDisplayLogic {
         }
         if viewModel.favButtonFeedback {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "reloadSearch"), object: nil)
         }
     }
     

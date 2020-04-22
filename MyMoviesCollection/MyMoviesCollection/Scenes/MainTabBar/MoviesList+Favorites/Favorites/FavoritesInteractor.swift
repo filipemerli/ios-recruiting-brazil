@@ -46,8 +46,9 @@ class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
     func fetchBannerImage(request: Favorites.MovieInfo.RequestBanner) {
         worker?.loadImage(posterUrl: request.posterUrl, { result in
             switch result {
-            case .failure(let error):
-                debugPrint("FetchBanner error: \(error.reason)")
+            case .failure( _):
+                let response = Favorites.MovieInfo.ResponseBanner(cell: request.cell, image: nil)
+                self.presenter?.showFavoriteBanner(response: response)
             case .success(let image):
                 let response = Favorites.MovieInfo.ResponseBanner(cell: request.cell, image: image)
                 self.presenter?.showFavoriteBanner(response: response)

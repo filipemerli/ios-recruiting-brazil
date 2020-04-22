@@ -12,19 +12,35 @@ enum SearchMovie {
     
     enum Fetch {
         
+        struct Request {
+            let page: Int
+            
+            init(page: Int) {
+                self.page = page
+            }
+        }
+        
         struct Response {
             let movies: [Movie]
+            let keyWord: String
+            let totalResults: Int
             
-            init(movies: [Movie]) {
+            init(movies: [Movie], keyWord: String, totalResults: Int) {
                 self.movies = movies
+                self.keyWord = keyWord
+                self.totalResults = totalResults
             }
         }
         
         struct ViewModel {
             let movies: [Movie]
+            let keyWord: String
+            let totalResults: Int
             
-            init(movies: [Movie]) {
+            init(movies: [Movie], keyWord: String, totalResults: Int) {
                 self.movies = movies
+                self.keyWord = keyWord
+                self.totalResults = totalResults
             }
         }
     }

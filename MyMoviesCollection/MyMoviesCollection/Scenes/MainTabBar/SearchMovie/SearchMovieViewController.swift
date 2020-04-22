@@ -18,17 +18,30 @@ class SearchMovieViewController: UIViewController {
 
     // MARK: - Properties
 
+    private let observerName = "reloadSearch"
     public var searchString = ""
+    public var totalResults = 0
     private let reuseIdentifier = "movcell"
     private let itemsPerRow: CGFloat = 2
     private let numOfSects = 2
     private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
-    private(set) var movies = [Movie]()
+    private var movies = [Movie]()
     var interactor: SearchMovieBusinessLogic?
     var router: (NSObjectProtocol & SearchMovieRoutingLogic & SearchMovieDataPassing)?
     public var movieToPresent: Movie?
+    private var isPrefetching = false
+    private var isPrefetchingDisabled = false
+
+    private var currentPage = 0 {
+        didSet {
+            if currentPage > 1 {
+                let request = SearchMovie.Fetch.Request(page: currentPage)
+                interactor?.fetchSearchMovies(request: request)
+            }
+        }
+    }
     
-    private(set) var viewState: ViewState = .loading {
+    private var viewState: ViewState = .loading {
         didSet {
             switch viewState {
             case .loaded:
@@ -104,7 +117,17 @@ class SearchMovieViewController: UIViewController {
         if viewState != .loaded {
             viewState = .loading
         }
-        interactor?.fetchSearchMovies()
+        if currentPage == 0 {
+            interactor?.fetchSearchMovies(request: SearchMovie.Fetch.Request(page: 1))
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let navTopItem = navigationController?.navigationBar.topItem {
+            navTopItem.titleView = .none
+            navTopItem.title = "\u{22}\(searchString)\u{22}"
+        }
     }
     
     override func loadView() {
@@ -117,9 +140,11 @@ class SearchMovieViewController: UIViewController {
     init(configurator: SearchMovieConfigurator = SearchMovieConfigurator.shared) {
         super.init(nibName: nil, bundle: nil)
         configurator.configure(viewController: self)
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: observerName), object: nil)
         collectionView.register(SearchMovieCollectionCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.prefetchDataSource = self
         setUpSubViews()
         
     }
@@ -127,6 +152,13 @@ class SearchMovieViewController: UIViewController {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         SearchMovieConfigurator.shared.configure(viewController: self)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: observerName), object: nil)
+        movies.removeAll()
+        currentPage = 0
+        searchString = ""
     }
     
     // MARK: Class Funcitons
@@ -152,6 +184,7 @@ class SearchMovieViewController: UIViewController {
 
     private func setUpNoResultsView() {
         view.addSubview(noResultsView)
+        noResultsView.backgroundColor = .white
         noResultsView.addSubview(imageView)
         noResultsView.addSubview(label)
         
@@ -173,6 +206,12 @@ class SearchMovieViewController: UIViewController {
         label.text = "Sua busca por \u{22}\(searchString)\u{22} não resultou em nenhum resultado."
         
     }
+    
+    @objc func reloadCollection() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
 
 }
 
@@ -187,10 +226,15 @@ extension SearchMovieViewController: SearchMovieDisplayLogic {
     }
     
     func renderMoviesList(viewModel: SearchMovie.Fetch.ViewModel) {
-        guard !(viewModel.movies.isEmpty) else {
+        isPrefetching = false
+        guard !(currentPage > 1 && viewModel.movies.isEmpty) else {
+            isPrefetchingDisabled = true
             return
         }
         movies.append(contentsOf: viewModel.movies)
+        searchString = viewModel.keyWord
+        totalResults = viewModel.totalResults
+        currentPage += 1
         viewState = movies.isEmpty ? .empty : .loaded
         DispatchQueue.main.async {
             self.collectionView.reloadData()
@@ -209,8 +253,7 @@ extension SearchMovieViewController: SearchMovieDisplayLogic {
 
 extension SearchMovieViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * Int(itemsPerRow)) : (indexPath.section * Int(itemsPerRow)) + 1)
-        movieToPresent = movies[cellIndex]
+        movieToPresent = movies[indexPath.row]
         guard movieToPresent != nil else {
             showErrorAlert(with: "Filme vazio")
             return
@@ -222,8 +265,9 @@ extension SearchMovieViewController: UICollectionViewDelegate {
 // MARK: - CollectionView DataSource
 
 extension SearchMovieViewController: UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return movies.count > 0 ? Int(itemsPerRow) : 0
+        return movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -236,29 +280,17 @@ extension SearchMovieViewController: UICollectionViewDataSource {
         guard movies.count > 0 else {
             return cell
         }
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
-        guard cellIndex < movies.count else {
-            return cell
-        }
-        cell.movieTitle = movies[cellIndex].title
+        cell.movieTitle = movies[indexPath.row].title
         return cell
         
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        if (movies.count > 0) {
-            return movies.count % Int(itemsPerRow) == 0 ? (movies.count / Int(itemsPerRow)) : ((movies.count + 1) / Int(itemsPerRow))
-        }else {
-            return 1
-        }
+        1
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
-        guard cellIndex < movies.count else {
-            return
-        }
-        let movie = movies[cellIndex]
+        let movie = movies[indexPath.row]
         let requestBanner = SearchMovie.MovieInfo.RequestBanner(cell: cell, posterUrl: movie.posterUrl ?? "https://")
         let requestFavorite = SearchMovie.MovieInfo.RequestFavorite(cell: cell, movieId: movie.id ?? 0)
         interactor?.fetchBannerImage(request: requestBanner)
@@ -284,6 +316,22 @@ extension SearchMovieViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return sectionInsets.left
+    }
+    
+}
+
+// MARK: - UITableViewDataSourcePrefetching
+
+extension SearchMovieViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        guard !isPrefetching && !isPrefetchingDisabled && movies.count < totalResults else { return }
+        let fetchMovies = indexPaths.contains { ($0.row >= movies.count - 1) }
+        
+        if fetchMovies {
+            isPrefetching = true
+            currentPage += 1
+        }
     }
     
 }

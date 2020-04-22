@@ -19,7 +19,7 @@ class SearchMoviePresenter: SearchMoviePresentationLogic {
     weak var viewController: (SearchMovieViewController)?
     
     func showMoviesList(response: SearchMovie.Fetch.Response) {
-        let viewModel = SearchMovie.Fetch.ViewModel(movies: response.movies)
+        let viewModel = SearchMovie.Fetch.ViewModel(movies: response.movies, keyWord: response.keyWord, totalResults: response.totalResults)
         viewController?.renderMoviesList(viewModel: viewModel)
     }
     

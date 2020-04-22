@@ -61,9 +61,9 @@ class MoviesAPIClient: ApiClient {
         }).resume()
     }
     
-    func fetchSearchMovie(text: String, completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
+    func fetchSearchMovie(page: Int, text: String, completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
         let url = Endpoints<MoviesAPIClient>.searchMovies.url
-        let parameters = ["query": text].merging(defaultParameters, uniquingKeysWith: +)
+        let parameters = ["query": text, "page" : "\(page)"].merging(defaultParameters, uniquingKeysWith: +)
         let request = buildRequest(.get, url: url, parameters: parameters)
         session.dataTask(with: request, completionHandler: { data, response, error in
             guard

@@ -43,19 +43,20 @@ class MoviesListViewController: UIViewController {
         return collection
     }()
     
+    private let observerName = "reloadMovies"
     var interactor: MoviesListBusinessLogic?
     var router: (NSObjectProtocol & MoviesListRoutingLogic & MoviesListDataPassing)?
     private let itemsPerRow: CGFloat = 2
     private let numOfSects = 2
     private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
-    private(set) var movies = [Movie]()
+    private var movies = [Movie]()
     private let reuseIdentifier = "movcell"
     private let collectionLayout = UICollectionViewFlowLayout()
     public var movieToPresent: Movie?
     public var keyWord: String?
     
-    private(set) var isPrefetching = false
-    private(set) var currentPage = 0 {
+    private var isPrefetching = false
+    private var currentPage = 0 {
         didSet {
             if currentPage == 0 {
                 currentPage += 1
@@ -102,7 +103,7 @@ class MoviesListViewController: UIViewController {
         collectionView.prefetchDataSource = self
         collectionView.collectionViewLayout = collectionLayout
         searchBar.delegate = self
-        NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: observerName), object: nil)
         setUpSubViews()
         setUpConstraints()
         
@@ -114,7 +115,7 @@ class MoviesListViewController: UIViewController {
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
+        NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: observerName), object: nil)
         //interactor?.cancelAllDownloads() - To Do
     }
     

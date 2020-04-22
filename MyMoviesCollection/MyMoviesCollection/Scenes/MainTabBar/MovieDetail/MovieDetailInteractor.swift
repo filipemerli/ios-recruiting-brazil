@@ -92,8 +92,9 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         }
         worker?.loadImage(posterUrl: bannerUrl, { resultBanner in
             switch resultBanner {
-            case .failure(let error):
-                debugPrint("FetchBanner error: \(error.reason)")
+            case .failure( _):
+                let response = MovieDetail.ShowMovieDetail.MovieBanner(image: nil)
+                self.presenter?.showMovieBanner(response: response)
             case .success(let image):
                 self.presenter?.showMovieBanner(response: MovieDetail.ShowMovieDetail.MovieBanner(image: image))
             }

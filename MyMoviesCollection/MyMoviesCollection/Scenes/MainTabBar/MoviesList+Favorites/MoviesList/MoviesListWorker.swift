@@ -12,12 +12,10 @@ class MoviesListWorker {
     
     private let apiClient: MoviesAPIClient
     private let loadImage: LoadImageWithCache
-    private let coreData: PersistanceManager
- 
-    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared, coreData: PersistanceManager = PersistanceManager.shared) {
+    
+    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared) {
         self.apiClient = apiClient
         self.loadImage = loadImage
-        self.coreData = coreData
         
     }
     
@@ -30,7 +28,8 @@ class MoviesListWorker {
     }
     
     func checkIfFavorite(movieId: Int32, _ completion: @escaping (Bool) -> ()) {
-        let result = coreData.checkFavorite(id: movieId)
+        let dataManager = PersistanceManager()
+        let result = dataManager.checkFavorite(id: movieId)
         completion(result)
     }
     

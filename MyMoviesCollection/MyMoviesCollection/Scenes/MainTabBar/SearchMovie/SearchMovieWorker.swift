@@ -21,8 +21,8 @@ class SearchMovieWorker {
         
     }
     
-    func fetchSearchMovies(keyWord: String, _ completion: @escaping (Result<MoviesResponse, ResponseError>) -> ()) {
-        apiClient.fetchSearchMovie(text: keyWord, completion: completion)
+    func fetchSearchMovies(page: Int, keyWord: String, _ completion: @escaping (Result<MoviesResponse, ResponseError>) -> ()) {
+        apiClient.fetchSearchMovie(page: page, text: keyWord, completion: completion)
     }
     
     func loadImage(posterUrl: String, _ completion: @escaping (Result<UIImage, ResponseError>) -> ()) {

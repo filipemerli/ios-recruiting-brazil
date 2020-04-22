@@ -44,8 +44,7 @@ class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
     func fetchBannerImage(request: MoviesList.MovieInfo.RequestBanner) {
         worker?.loadImage(posterUrl: request.posterUrl, { result in
             switch result {
-            case .failure(let error):
-                debugPrint("FetchBanner error: \(error.reason)")
+            case .failure( _):
                 let response = MoviesList.MovieInfo.ResponseBanner(cell: request.cell, image: nil)
                 self.presenter?.showMovieBanner(response: response)
             case .success(let image):

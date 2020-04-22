@@ -45,9 +45,9 @@ enum Favorites {
         
         struct ResponseBanner {
             let cell: UITableViewCell
-            let image: UIImage
+            let image: UIImage?
             
-            init(cell: UITableViewCell, image: UIImage) {
+            init(cell: UITableViewCell, image: UIImage?) {
                 self.cell = cell
                 self.image = image
             }
@@ -55,9 +55,9 @@ enum Favorites {
         
         struct ViewModelBanner {
             let cell: UITableViewCell
-            let image: UIImage
+            let image: UIImage?
             
-            init(cell: UITableViewCell, image: UIImage) {
+            init(cell: UITableViewCell, image: UIImage?) {
                 self.cell = cell
                 self.image = image
             }
