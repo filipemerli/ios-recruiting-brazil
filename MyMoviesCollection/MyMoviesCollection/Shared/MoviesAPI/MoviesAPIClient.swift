@@ -8,11 +8,6 @@
 
 import Foundation
 
-public enum MoviesApiClientResponse<T> {
-    case success(T)
-    case error(Error)
-}
-
 class MoviesAPIClient: ApiClient {
     
     static var shared: MoviesAPIClient = {
@@ -47,7 +42,7 @@ class MoviesAPIClient: ApiClient {
         }).resume()
     }
     
-    func fetchMoviesGenres(_ completion: @escaping (MoviesApiClientResponse<GenresResponse>) -> Void) {
+    func fetchMoviesGenres(_ completion: @escaping (Result<GenresResponse, ResponseError>) -> Void) {
         let url = Endpoints<MoviesAPIClient>.genders.url
         let request = buildRequest(.get, url: url, parameters: defaultParameters)
         session.dataTask(with: request, completionHandler: { data, response, error in
@@ -55,14 +50,14 @@ class MoviesAPIClient: ApiClient {
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
                 else {
-                    completion(MoviesApiClientResponse.error(ResponseError.rede))
+                    completion(Result.failure(ResponseError.rede))
                     return
             }
             guard let decodedResponse = try? JSONDecoder().decode(GenresResponse.self, from: data) else {
-                completion(MoviesApiClientResponse.error(ResponseError.decoding))
+                completion(Result.failure(ResponseError.decoding))
                 return
             }
-            completion(MoviesApiClientResponse.success(decodedResponse))
+            completion(Result.success(decodedResponse))
         }).resume()
     }
     
@@ -86,7 +81,7 @@ class MoviesAPIClient: ApiClient {
         }).resume()
     }
     
-    func fetchMovies(page: Int, _ completion: @escaping (MoviesApiClientResponse<MoviesResponse>) -> Void) {
+    func fetchMovies(page: Int, _ completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
         let url = Endpoints<MoviesAPIClient>.popularMovies.url
         let parameters = ["page": "\(page)"].merging(defaultParameters, uniquingKeysWith: +)
         let request = buildRequest(.get, url: url, parameters: parameters)
@@ -95,14 +90,14 @@ class MoviesAPIClient: ApiClient {
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
                 else {
-                    completion(MoviesApiClientResponse.error(ResponseError.rede))
+                    completion(Result.failure(ResponseError.rede))
                     return
             }
             guard let decodedResponse = try? JSONDecoder().decode(MoviesResponse.self, from: data) else {
-                completion(MoviesApiClientResponse.error(ResponseError.decoding))
+                completion(Result.failure(ResponseError.decoding))
                 return
             }
-            completion(MoviesApiClientResponse.success(decodedResponse))
+            completion(Result.success(decodedResponse))
         }).resume()
     }
     

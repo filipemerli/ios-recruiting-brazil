@@ -35,8 +35,8 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     func fetchMovieGenres() {
         worker?.fetchGenres() { resultGens in
             switch resultGens {
-            case .error(let errorGens):
-                self.presenter?.showError(withMessage: errorGens.localizedDescription)
+            case .failure(let errorGens):
+                self.presenter?.showError(withMessage: errorGens.reason)
             case .success(let responseGens):
                 self.genres.append(contentsOf: responseGens.genres)
                 let response = MovieDetail.ShowMovieDetail.MovieGenres(genres: self.findGens(genIds: self.movie?.generedIds ?? [0]))
@@ -92,8 +92,8 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
         }
         worker?.loadImage(posterUrl: bannerUrl, { resultBanner in
             switch resultBanner {
-            case .error(let error):
-                self.presenter?.showError(withMessage: error.localizedDescription)
+            case .failure(let error):
+                debugPrint("FetchBanner error: \(error.reason)")
             case .success(let image):
                 self.presenter?.showMovieBanner(response: MovieDetail.ShowMovieDetail.MovieBanner(image: image))
             }

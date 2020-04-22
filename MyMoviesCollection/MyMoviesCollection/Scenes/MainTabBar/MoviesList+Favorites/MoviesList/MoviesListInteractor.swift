@@ -19,9 +19,9 @@ protocol MoviesListDataStore {
 class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
 
     var presenter: MoviesListPresentationLogic?
-    private var worker: MoviesListFavoritesWorker?
+    private var worker: MoviesListWorker?
     
-    init (worker: MoviesListFavoritesWorker = MoviesListFavoritesWorker()) {
+    init (worker: MoviesListWorker = MoviesListWorker()) {
         self.worker = worker
     }
     
@@ -30,8 +30,8 @@ class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
     func fetchPopularMovies(request: MoviesList.Fetch.Request) {
         worker?.fetchPopularMovies(page: request.page) { resultMov in
             switch resultMov {
-            case .error(let errorMov):
-                self.presenter?.showError(withMessage: errorMov.localizedDescription)
+            case .failure(let errorMov):
+                self.presenter?.showError(withMessage: errorMov.reason)
             case .success(let responseMov):
                 let response = MoviesList.Fetch.Response(movies: responseMov.movies, total: responseMov.totalResults)
                 self.presenter?.showMoviesList(response: response)
@@ -44,8 +44,10 @@ class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
     func fetchBannerImage(request: MoviesList.MovieInfo.RequestBanner) {
         worker?.loadImage(posterUrl: request.posterUrl, { result in
             switch result {
-            case .error(let error):
-                self.presenter?.showError(withMessage: error.localizedDescription)
+            case .failure(let error):
+                debugPrint("FetchBanner error: \(error.reason)")
+                let response = MoviesList.MovieInfo.ResponseBanner(cell: request.cell, image: nil)
+                self.presenter?.showMovieBanner(response: response)
             case .success(let image):
                 let response = MoviesList.MovieInfo.ResponseBanner(cell: request.cell, image: image)
                 self.presenter?.showMovieBanner(response: response)

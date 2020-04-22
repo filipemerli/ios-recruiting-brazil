@@ -52,6 +52,7 @@ class MoviesListViewController: UIViewController {
     private let reuseIdentifier = "movcell"
     private let collectionLayout = UICollectionViewFlowLayout()
     public var movieToPresent: Movie?
+    public var keyWord: String?
     
     private(set) var isPrefetching = false
     private(set) var currentPage = 0 {
@@ -100,6 +101,7 @@ class MoviesListViewController: UIViewController {
         collectionView.dataSource = self
         collectionView.prefetchDataSource = self
         collectionView.collectionViewLayout = collectionLayout
+        searchBar.delegate = self
         NotificationCenter.default.addObserver(self, selector: #selector(reloadCollection), name: NSNotification.Name(rawValue: "reloadMovies"), object: nil)
         setUpSubViews()
         setUpConstraints()
@@ -160,7 +162,7 @@ class MoviesListViewController: UIViewController {
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBar.heightAnchor.constraint(equalToConstant: 40),
             collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
         ])
@@ -281,7 +283,8 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
     
 }
 
-// MARK: UITableViewDataSourcePrefetching
+// MARK: - UITableViewDataSourcePrefetching
+
 extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
     
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
@@ -295,4 +298,13 @@ extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
         }
     }
     
+}
+
+// MARK: - SearchBar Delegate
+
+extension MoviesListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        keyWord = searchBar.text ?? ""
+        router?.routeToSearch(source: self)
+    }
 }

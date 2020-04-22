@@ -14,12 +14,11 @@ protocol ShowAlert {
 
 extension UIViewController: ShowAlert {
     func showErrorAlert(with message: String) {
-        guard presentedViewController == nil else {
-            return
-        }
         let alertController = UIAlertController(title: "Alerta", message: message, preferredStyle: .alert)
         let action = UIAlertAction(title: "Ok", style: .default, handler: nil)
         alertController.addAction(action)
-        present(alertController, animated: true)
+        DispatchQueue.main.async {
+            self.present(alertController, animated: true)
+        }
     }
 }

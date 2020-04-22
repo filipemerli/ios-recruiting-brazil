@@ -21,9 +21,9 @@ protocol FavoritesDataStore {
 class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
 
     var presenter: FavoritesPresentationLogic?
-    private var worker: MoviesListFavoritesWorker?
+    private var worker: FavoritesWorker?
     
-    init (worker: MoviesListFavoritesWorker = MoviesListFavoritesWorker()) {
+    init (worker: FavoritesWorker = FavoritesWorker()) {
         self.worker = worker
     }
     
@@ -46,8 +46,8 @@ class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
     func fetchBannerImage(request: Favorites.MovieInfo.RequestBanner) {
         worker?.loadImage(posterUrl: request.posterUrl, { result in
             switch result {
-            case .error(let error):
-                self.presenter?.showError(withMessage: error.localizedDescription)
+            case .failure(let error):
+                debugPrint("FetchBanner error: \(error.reason)")
             case .success(let image):
                 let response = Favorites.MovieInfo.ResponseBanner(cell: request.cell, image: image)
                 self.presenter?.showFavoriteBanner(response: response)

@@ -24,15 +24,20 @@ class PersistanceManager {
         }
     }
     
-    public func saveFavorite(movie: Movie) throws {
+    public func saveFavorite(movie: Movie) -> Bool {
         let movieToSave = FavoriteMovie(context: managedObjectContext)
         movieToSave.title = movie.title
         movieToSave.id = movie.id ?? 0
         movieToSave.overview = movie.overview
         movieToSave.year = String(movie.releaseDate?.prefix(4) ?? "0000")
         movieToSave.posterUrl = movie.posterUrl
-      
-        try managedObjectContext.save()
+        do {
+           try managedObjectContext.save()
+            return true
+        } catch {
+            return false
+        }
+        
     }
     
     public func deleteFavorite(id: Int32) -> Bool {
@@ -45,7 +50,7 @@ class PersistanceManager {
                     managedObjectContext.delete(item)
                     didDeleted = true
                 }
-                PersistanceService.saveContext()
+                try managedObjectContext.save()
                 return didDeleted
             } else {
                 return false

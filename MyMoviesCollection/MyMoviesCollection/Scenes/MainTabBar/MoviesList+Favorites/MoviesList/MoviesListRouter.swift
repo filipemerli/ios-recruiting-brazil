@@ -10,6 +10,7 @@ import Foundation
 
 @objc protocol MoviesListRoutingLogic {
     func routeToDetail(source: MoviesListViewController)
+    func routeToSearch(source: MoviesListViewController)
 }
 
 protocol MoviesListDataPassing {
@@ -30,9 +31,20 @@ class MoviesListRouter: NSObject, MoviesListRoutingLogic, MoviesListDataPassing 
         navigateToDetail(source: source, destination: destinationVC)
     }
     
+    func routeToSearch(source: MoviesListViewController) {
+        let destinationVC = SearchMovieViewController()
+        var destinationDS = destinationVC.router!.dataStore!
+        passDataToSearch(source: dataStore!, destination: &destinationDS)
+        navigateToSearch(source: source, destination: destinationVC)
+    }
+    
     // MARK: Navigation
     
     func navigateToDetail(source: MoviesListViewController, destination: MovieDetailViewController) {
+        source.show(destination, sender: nil)
+    }
+    
+    func navigateToSearch(source: MoviesListViewController, destination: SearchMovieViewController) {
         source.show(destination, sender: nil)
     }
     
@@ -41,6 +53,11 @@ class MoviesListRouter: NSObject, MoviesListRoutingLogic, MoviesListDataPassing 
     func passDataToDetail(source: MoviesListDataStore, destination: inout MovieDetailDataStore) {
         guard let selectedMovie = viewController?.movieToPresent else { return } // TO DO: ERROR
         destination.movie = selectedMovie
+    }
+    
+    func passDataToSearch(source: MoviesListDataStore, destination: inout SearchMovieDataStore) {
+        guard let keyWord = viewController?.keyWord else { return } // TO DO: ERROR
+        destination.keyWord = keyWord
     }
     
 }

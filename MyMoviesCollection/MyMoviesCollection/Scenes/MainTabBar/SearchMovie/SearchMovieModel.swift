@@ -1,31 +1,22 @@
 //
-//  MoviesListModel.swift
+//  SearchMovieModel.swift
 //  MyMoviesCollection
 //
-//  Created by Filipe Merli on 24/03/20.
+//  Created by Filipe Merli on 22/04/20.
 //  Copyright © 2020 Filipe Merli. All rights reserved.
 //
 
 import UIKit
 
-enum MoviesList {
+enum SearchMovie {
     
     enum Fetch {
-        struct Request {
-            let page: Int
-            
-            init(page: Int) {
-                self.page = page
-            }
-        }
         
         struct Response {
             let movies: [Movie]
-            let total: Int
             
-            init(movies: [Movie], total: Int) {
+            init(movies: [Movie]) {
                 self.movies = movies
-                self.total = total
             }
         }
         
@@ -101,3 +92,4 @@ enum MoviesList {
     }
     
 }
+

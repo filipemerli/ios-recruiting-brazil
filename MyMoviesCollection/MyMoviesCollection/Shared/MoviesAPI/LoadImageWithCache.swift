@@ -22,14 +22,14 @@ class LoadImageWithCache {
     
     // MARK: - Class Functions
     
-    func downloadMovieAPIImage(posterUrl: String, _ completion: @escaping (MoviesApiClientResponse<UIImage>) -> Void) {
+    func downloadMovieAPIImage(posterUrl: String, _ completion: @escaping (Result<UIImage, ResponseError>) -> Void) {
         let urlConcat = "https://image.tmdb.org/t/p/w500" + posterUrl
         guard let url = URL(string: urlConcat) else {
-            completion(MoviesApiClientResponse.error(ResponseError.rede))
+            completion(Result.failure(ResponseError.rede))
             return
         }
         if let imageFromCache = imageCache.object(forKey: url.absoluteString as NSString) as? UIImage {
-            completion(MoviesApiClientResponse.success(imageFromCache))
+            completion(Result.success(imageFromCache))
             return
         }
         URLSession.shared.dataTask(with: url, completionHandler: { data, response, error in
@@ -37,15 +37,15 @@ class LoadImageWithCache {
                 let httpResponse = response as? HTTPURLResponse, httpResponse.hasSuccessStatusCode,
                 let data = data
                 else {
-                    completion(MoviesApiClientResponse.error(ResponseError.rede))
+                    completion(Result.failure(ResponseError.rede))
                     return
             }
             guard let imageToCache = UIImage(data: data) else {
-                completion(MoviesApiClientResponse.error(ResponseError.rede))
+                completion(Result.failure(ResponseError.rede))
                 return
             }
             self.imageCache.setObject(imageToCache, forKey: urlConcat as NSString)
-            completion(MoviesApiClientResponse.success(imageToCache))
+            completion(Result.success(imageToCache))
         }).resume()
     }
     
