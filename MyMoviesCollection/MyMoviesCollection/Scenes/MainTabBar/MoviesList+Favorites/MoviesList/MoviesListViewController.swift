@@ -50,7 +50,7 @@ class MoviesListViewController: UIViewController {
     private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
     private(set) var movies = [Movie]()
     private let reuseIdentifier = "movcell"
-    private let collectionLayout = MoviesListFlowLayout()
+    private let collectionLayout = UICollectionViewFlowLayout()
     public var movieToPresent: Movie?
     
     private(set) var isPrefetching = false

@@ -19,9 +19,9 @@ protocol MoviesListDataStore {
 class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
 
     var presenter: MoviesListPresentationLogic?
-    private var worker: MoviesListWorker?
+    private var worker: MoviesListFavoritesWorker?
     
-    init (worker: MoviesListWorker = MoviesListWorker()) {
+    init (worker: MoviesListFavoritesWorker = MoviesListFavoritesWorker()) {
         self.worker = worker
     }
     

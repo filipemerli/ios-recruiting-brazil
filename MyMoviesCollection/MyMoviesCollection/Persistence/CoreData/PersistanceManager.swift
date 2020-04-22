@@ -14,8 +14,14 @@ class PersistanceManager {
     let managedObjectContext = PersistanceService.context
     let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FavoriteMovie")
     
-    public func fetchFavoritesList() throws -> [FavoriteMovie] {
-        return try (managedObjectContext.fetch(fetchRequest) as? [FavoriteMovie] ?? [])
+    public func fetchFavoritesList(_ completion: @escaping (Result<[FavoriteMovie], ResponseError>) -> Void) {
+        var favMovies: [FavoriteMovie] = []
+        do {
+            favMovies =  try managedObjectContext.fetch(fetchRequest) as? [FavoriteMovie] ?? []
+            completion(Result.success(favMovies))
+        } catch {
+            completion(Result.failure(ResponseError.generic))
+        }
     }
     
     public func saveFavorite(movie: Movie) throws {
@@ -39,6 +45,7 @@ class PersistanceManager {
                     managedObjectContext.delete(item)
                     didDeleted = true
                 }
+                PersistanceService.saveContext()
                 return didDeleted
             } else {
                 return false

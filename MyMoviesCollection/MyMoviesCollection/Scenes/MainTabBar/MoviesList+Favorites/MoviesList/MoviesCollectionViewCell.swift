@@ -12,7 +12,7 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Properties
     
-    lazy private var bannerView: UIImageView = {
+    private lazy var bannerView: UIImageView = {
         let view = UIImageView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.contentMode = .scaleToFill

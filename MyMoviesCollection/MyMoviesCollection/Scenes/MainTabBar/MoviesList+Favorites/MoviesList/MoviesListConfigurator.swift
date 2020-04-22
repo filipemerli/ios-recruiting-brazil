@@ -25,5 +25,4 @@ class MoviesListConfigurator {
         router.dataStore = interactor
     }
     
-    
 }
