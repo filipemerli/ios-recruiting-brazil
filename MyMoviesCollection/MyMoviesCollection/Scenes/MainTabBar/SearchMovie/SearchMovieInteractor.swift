@@ -18,11 +18,12 @@ protocol SearchMovieDataStore {
     var keyWord: String? { get set }
 }
 
-class SearchMovieInteractor: SearchMovieBusinessLogic, SearchMovieDataStore {
+final class SearchMovieInteractor: SearchMovieBusinessLogic, SearchMovieDataStore {
     
     var keyWord: String?
     var presenter: SearchMoviePresentationLogic?
     private var worker: SearchMovieWorker?
+    var dataManager: PersistanceManager?
     
     init (worker: SearchMovieWorker = SearchMovieWorker()) {
         self.worker = worker
@@ -64,11 +65,9 @@ class SearchMovieInteractor: SearchMovieBusinessLogic, SearchMovieDataStore {
     // MARK: Check if is favorite
     
     func checkIfFavorite(request: SearchMovie.MovieInfo.RequestFavorite) {
-        worker?.checkIfFavorite(movieId: request.movieId, { success in
-            let response = SearchMovie.MovieInfo.ResponseFavorite(cell: request.cell, isFavorite: success)
-            self.presenter?.showFavoriteFeedback(response: response)
-        })
-        
+        let success = dataManager?.checkFavorite(id: request.movieId) ?? false
+        let response = SearchMovie.MovieInfo.ResponseFavorite(cell: request.cell, isFavorite: success)
+        self.presenter?.showFavoriteFeedback(response: response)
     }
     
 }

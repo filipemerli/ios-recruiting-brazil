@@ -16,7 +16,7 @@ protocol MovieDetailPresentationLogic {
     func showError(withMessage message: String)
 }
 
-class MovieDetailPresenter: MovieDetailPresentationLogic {
+final class MovieDetailPresenter: MovieDetailPresentationLogic {
     weak var viewController: (MovieDetailViewController)?
     
     func showMovieDetail(response: MovieDetail.ShowMovieDetail.ViewModel) {

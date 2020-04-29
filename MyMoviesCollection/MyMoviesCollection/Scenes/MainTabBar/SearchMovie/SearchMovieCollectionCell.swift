@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SearchMovieCollectionCell: UICollectionViewCell {
+final class SearchMovieCollectionCell: UICollectionViewCell {
     
     // MARK: - Properties
         

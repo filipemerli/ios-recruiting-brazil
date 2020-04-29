@@ -10,7 +10,7 @@ import Foundation
 
 class ApiClient {
     
-    let configuration: URLSessionConfiguration
+    fileprivate let configuration: URLSessionConfiguration
     
     lazy var session: URLSession = {
         return URLSession(configuration: self.configuration)

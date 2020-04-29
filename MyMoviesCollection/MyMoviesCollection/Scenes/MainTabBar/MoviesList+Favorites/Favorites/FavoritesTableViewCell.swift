@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FavoritesTableViewCell: UITableViewCell {
+final class FavoritesTableViewCell: UITableViewCell {
     
     // MARK: - Properties
     

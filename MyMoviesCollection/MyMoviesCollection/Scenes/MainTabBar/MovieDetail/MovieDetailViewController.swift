@@ -15,7 +15,7 @@ protocol MovieDetailDisplayLogic: class {
     func renderFavoriteButtonFeedback(viewModel: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback)
 }
 
-class MovieDetailViewController: UIViewController, Alerts {
+final class MovieDetailViewController: UIViewController, Alerts {
     
     // MARK: - Properties
     

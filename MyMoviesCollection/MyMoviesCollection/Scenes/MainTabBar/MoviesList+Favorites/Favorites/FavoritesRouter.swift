@@ -16,7 +16,7 @@ protocol FavoritesDataPassing {
     //var dataStore: FavoritesDataStore? { get }
 }
 
-class FavoritesRouter: NSObject, FavoritesRoutingLogic, FavoritesDataPassing {
+final class FavoritesRouter: NSObject, FavoritesRoutingLogic, FavoritesDataPassing {
     
     weak var viewController: FavoritesViewController?
     var dataStore: FavoritesDataStore?

@@ -14,7 +14,7 @@ protocol SearchMovieDisplayLogic: class {
     func renderFavoriteFeedback(viewModel: SearchMovie.MovieInfo.ViewModelFavorite)
 }
 
-class SearchMovieViewController: UIViewController {
+final class SearchMovieViewController: UIViewController {
 
     // MARK: - Properties
 
@@ -187,22 +187,20 @@ class SearchMovieViewController: UIViewController {
         noResultsView.backgroundColor = .white
         noResultsView.addSubview(imageView)
         noResultsView.addSubview(label)
-        
-        noResultsView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        noResultsView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        noResultsView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        noResultsView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        
-        imageView.bottomAnchor.constraint(equalTo: noResultsView.centerYAnchor).isActive = true
-        imageView.leadingAnchor.constraint(equalTo: noResultsView.leadingAnchor).isActive = true
-        imageView.trailingAnchor.constraint(equalTo: noResultsView.trailingAnchor).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: (view.frame.height / 4)).isActive = true
-        
-        label.topAnchor.constraint(equalTo: noResultsView.centerYAnchor).isActive = true
-        label.leadingAnchor.constraint(equalTo: noResultsView.leadingAnchor, constant: 45).isActive = true
-        label.trailingAnchor.constraint(equalTo: noResultsView.trailingAnchor, constant: -45).isActive = true
-        label.heightAnchor.constraint(equalToConstant: (view.frame.height / 4)).isActive = true
-        
+        NSLayoutConstraint.activate([
+            noResultsView.topAnchor.constraint(equalTo: view.topAnchor),
+            noResultsView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            noResultsView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            noResultsView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: noResultsView.centerYAnchor),
+            imageView.leadingAnchor.constraint(equalTo: noResultsView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: noResultsView.trailingAnchor),
+            imageView.heightAnchor.constraint(equalToConstant: (view.frame.height / 4)),
+            label.topAnchor.constraint(equalTo: noResultsView.centerYAnchor),
+            label.leadingAnchor.constraint(equalTo: noResultsView.leadingAnchor, constant: 45),
+            label.trailingAnchor.constraint(equalTo: noResultsView.trailingAnchor, constant: -45),
+            label.heightAnchor.constraint(equalToConstant: (view.frame.height / 4))
+        ])
         label.text = "Sua busca por \u{22}\(searchString)\u{22} não resultou em nenhum resultado."
         
     }

@@ -19,11 +19,12 @@ protocol MovieDetailDataStore {
     var movie: Movie? { get set }
 }
 
-class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
+final class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
     
     var movie: Movie?
     var presenter: MovieDetailPresentationLogic?
     private var worker: MovieDetailWorker?
+    var dataManager: PersistanceManager?
     private var genres: [Genre] = []
     
     init (worker: MovieDetailWorker = MovieDetailWorker()) {
@@ -77,9 +78,8 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
             presenter?.showError(withMessage: "Não foi possível verificar se o filme é favorito.")
             return
         }
-        worker?.checkIfFavorite(movieId: movieId, { success in
-            self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
-        })
+        let isFav = dataManager?.checkFavorite(id: movieId) ?? false
+        self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: isFav))
         
     }
     
@@ -108,13 +108,12 @@ class MovieDetailInteractor: MovieDetailBusinessLogic, MovieDetailDataStore {
             self.presenter?.showError(withMessage: "Filme vazio.")
             return
         }
-        worker?.favoriteMovie(movie: movieToSave, { success in
-            if success {
-                self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: success))
-            } else {
-                self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente.")
-            }
-        })
+        let favorited = dataManager?.saveFavorite(movie: movieToSave) ?? false
+        if favorited {
+            self.presenter?.showFavoriteFeedback(response: MovieDetail.ShowMovieDetail.MovieFavButtonFeedback(favButtonFeedback: true))
+        } else {
+            self.presenter?.showError(withMessage: "Erro ao favoritar, tente novamente.")
+        }
     }
     
 }

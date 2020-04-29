@@ -8,7 +8,7 @@
 
 import Foundation
 
-class MoviesListConfigurator {
+final class MoviesListConfigurator {
     
     static let shared = MoviesListConfigurator()
     
@@ -16,10 +16,12 @@ class MoviesListConfigurator {
         let interactor = MoviesListInteractor()
         let presenter = MoviesListPresenter()
         let router = MoviesListRouter()
+        let dataManager = PersistanceManager()
         
         viewController.interactor = interactor
         viewController.router = router
         interactor.presenter = presenter
+        interactor.dataManager = dataManager
         presenter.viewController = viewController
         router.viewController = viewController
         router.dataStore = interactor

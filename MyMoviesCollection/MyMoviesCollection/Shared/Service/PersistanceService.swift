@@ -9,7 +9,7 @@
 import Foundation
 import CoreData
 
-class PersistanceService {
+final class PersistanceService {
     
     static var context: NSManagedObjectContext {
       return persistentContainer.viewContext
@@ -24,15 +24,26 @@ class PersistanceService {
         }
         return container
     }()
-        
-    static func saveContext() {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch let error as NSError {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
+    
+    static func saveContext () -> Bool {
+      let context = persistentContainer.viewContext
+      if context.hasChanges {
+        do {
+          try context.save()
+            return true
+        } catch {
+            return false
+        }
+      } else {
+        return false
+        }
+    }
+    
+    deinit {
+        do {
+            try PersistanceService.context.save()
+        } catch {
+            fatalError("Error deinitializing main managed object context")
         }
     }
 }

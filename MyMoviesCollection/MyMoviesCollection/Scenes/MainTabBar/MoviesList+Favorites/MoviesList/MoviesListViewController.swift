@@ -14,7 +14,7 @@ protocol MoviesListDisplayLogic: class {
     func renderFavoriteFeedback(viewModel: MoviesList.MovieInfo.ViewModelFavorite)
 }
 
-class MoviesListViewController: UIViewController {
+final class MoviesListViewController: UIViewController {
     
     // MARK:  Properties
     
@@ -212,8 +212,7 @@ extension MoviesListViewController: MoviesListDisplayLogic {
 
 extension MoviesListViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * Int(itemsPerRow)) : (indexPath.section * Int(itemsPerRow)) + 1)
-        movieToPresent = movies[cellIndex]
+        movieToPresent = movies[indexPath.row]
         guard movieToPresent != nil else {
             showErrorAlert(with: "Filme vazio")
             return
@@ -226,7 +225,7 @@ extension MoviesListViewController: UICollectionViewDelegate {
 
 extension MoviesListViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return movies.count > 0 ? Int(itemsPerRow) : 0
+        return movies.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -239,27 +238,15 @@ extension MoviesListViewController: UICollectionViewDataSource {
         guard movies.count > 0 else {
             return cell
         }
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
-        cell.movieTitle = movies[cellIndex].title
+        let movieCell = movies[indexPath.row]
+        cell.movieTitle = movieCell.title
+        interactor?.checkIfFavorite(request: MoviesList.MovieInfo.RequestFavorite(cell: cell, movieId: movieCell.id ?? 0))
+        interactor?.fetchBannerImage(request: MoviesList.MovieInfo.RequestBanner(cell: cell, posterUrl: movieCell.posterUrl ?? "https://"))
         return cell
-        
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        if (movies.count > 0) {
-            return movies.count % Int(itemsPerRow) == 0 ? (movies.count / Int(itemsPerRow)) : ((movies.count + 1) / Int(itemsPerRow))
-        }else {
-            return 1
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let cellIndex = (indexPath.row == 0 ? (indexPath.section * 2) : ((indexPath.section * 2) + 1))
-        let movie = movies[cellIndex]
-        let requestBanner = MoviesList.MovieInfo.RequestBanner(cell: cell, posterUrl: movie.posterUrl ?? "https://")
-        let requestFavorite = MoviesList.MovieInfo.RequestFavorite(cell: cell, movieId: movie.id ?? 0)
-        interactor?.fetchBannerImage(request: requestBanner)
-        interactor?.checkIfFavorite(request: requestFavorite)
+        1
     }
     
 }
@@ -291,7 +278,7 @@ extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         guard !isPrefetching && !isPrefetchingDisabled else { return }
         
-        let fetchMovies = indexPaths.contains { (($0.section * 2) + 3) >= movies.count }
+        let fetchMovies = indexPaths.contains { (($0.row) + 1) >= movies.count }
         
         if fetchMovies {
             isPrefetching = true

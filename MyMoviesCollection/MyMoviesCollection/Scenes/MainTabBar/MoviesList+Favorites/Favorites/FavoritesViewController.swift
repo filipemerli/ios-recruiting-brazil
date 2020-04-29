@@ -15,7 +15,7 @@ protocol FavoritesDisplayLogic: class {
 }
 
 
-class FavoritesViewController: UIViewController, Alerts {
+final class FavoritesViewController: UIViewController, Alerts {
     
     // MARK:  Properties
     
@@ -187,7 +187,7 @@ extension FavoritesViewController: UITableViewDataSource {
                 self.interactor?.deleteFavorite(request: Favorites.DeleteFavorite.Request(movieId: movieId, indexPath: indexPath))
             }
             let actionCancel = UIAlertAction(title: "Não desejo", style: .default, handler: nil)
-            displayAlert(with: "Alerta", message: kUnfavoriteConfirmation, actions: [action, actionCancel])
+            displayAlert(with: "Alerta", message: ConstantsKeys.kUnfavoriteConfirmation, actions: [action, actionCancel])
         }
     }
     

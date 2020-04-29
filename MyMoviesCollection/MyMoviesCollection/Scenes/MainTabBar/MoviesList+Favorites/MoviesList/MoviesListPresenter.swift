@@ -15,7 +15,7 @@ protocol MoviesListPresentationLogic {
     func showError(withMessage message: String)
 }
 
-class MoviesListPresenter: MoviesListPresentationLogic {
+final class MoviesListPresenter: MoviesListPresentationLogic {
     weak var viewController: (MoviesListViewController)?
     
     func showMoviesList(response: MoviesList.Fetch.Response) {

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class MoviesAPIClient: ApiClient {
+final class MoviesAPIClient: ApiClient {
     
     static var shared: MoviesAPIClient = {
         let config = URLSessionConfiguration.default
@@ -20,7 +20,7 @@ class MoviesAPIClient: ApiClient {
         return MoviesAPIClient(configuration: config)
     }()
     
-    let defaultParameters = ["api_key" : "6009379178c6cf65ffc7468b6598440f", "language" : "pt-BR"]
+    fileprivate let defaultParameters = ["api_key" : "6009379178c6cf65ffc7468b6598440f", "language" : "pt-BR"]
     
     func fetchPopularMovies(page: Int, completion: @escaping (Result<MoviesResponse, ResponseError>) -> Void) {
         let url = Endpoints<MoviesAPIClient>.popularMovies.url

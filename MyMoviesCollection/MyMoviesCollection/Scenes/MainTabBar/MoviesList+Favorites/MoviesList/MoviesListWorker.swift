@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MoviesListWorker {
+final class MoviesListWorker {
     
     private let apiClient: MoviesAPIClient
     private let loadImage: LoadImageWithCache
@@ -25,12 +25,6 @@ class MoviesListWorker {
     
     func loadImage(posterUrl: String, _ completion: @escaping (Result<UIImage, ResponseError>) -> ()) {
         loadImage.downloadMovieAPIImage(posterUrl: posterUrl, completion)
-    }
-    
-    func checkIfFavorite(movieId: Int32, _ completion: @escaping (Bool) -> ()) {
-        let dataManager = PersistanceManager()
-        let result = dataManager.checkFavorite(id: movieId)
-        completion(result)
     }
     
 }

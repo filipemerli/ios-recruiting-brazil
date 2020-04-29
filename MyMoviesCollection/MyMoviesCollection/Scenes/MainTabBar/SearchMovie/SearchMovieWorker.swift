@@ -8,17 +8,14 @@
 
 import UIKit
 
-class SearchMovieWorker {
+final class SearchMovieWorker {
     
     private let apiClient: MoviesAPIClient
     private let loadImage: LoadImageWithCache
-    private let coreData: PersistanceManager
  
-    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared, coreData: PersistanceManager = PersistanceManager.shared) {
+    init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared) {
         self.apiClient = apiClient
         self.loadImage = loadImage
-        self.coreData = coreData
-        
     }
     
     func fetchSearchMovies(page: Int, keyWord: String, _ completion: @escaping (Result<MoviesResponse, ResponseError>) -> ()) {
@@ -27,11 +24,6 @@ class SearchMovieWorker {
     
     func loadImage(posterUrl: String, _ completion: @escaping (Result<UIImage, ResponseError>) -> ()) {
         loadImage.downloadMovieAPIImage(posterUrl: posterUrl, completion)
-    }
-    
-    func checkIfFavorite(movieId: Int32, _ completion: @escaping (Bool) -> ()) {
-        let result = coreData.checkFavorite(id: movieId)
-        completion(result)
     }
     
 }

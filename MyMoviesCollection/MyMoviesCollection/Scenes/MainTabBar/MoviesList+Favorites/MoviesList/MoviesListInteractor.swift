@@ -16,10 +16,11 @@ protocol MoviesListDataStore {
     //var movie: Movie { get set }  *** TO DO: Check this
 }
 
-class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
+final class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
 
     var presenter: MoviesListPresentationLogic?
     private var worker: MoviesListWorker?
+    var dataManager: PersistanceManager?
     
     init (worker: MoviesListWorker = MoviesListWorker()) {
         self.worker = worker
@@ -57,11 +58,9 @@ class MoviesListInteractor: MoviesListBusinessLogic, MoviesListDataStore {
     // MARK: Check if is favorite
     
     func checkIfFavorite(request: MoviesList.MovieInfo.RequestFavorite) {
-        worker?.checkIfFavorite(movieId: request.movieId, { success in
-            let response = MoviesList.MovieInfo.ResponseFavorite(cell: request.cell, isFavorite: success)
-            self.presenter?.showFavoriteFeedback(response: response)
-        })
-        
+        let success = dataManager?.checkFavorite(id: request.movieId) ?? false
+        let response = MoviesList.MovieInfo.ResponseFavorite(cell: request.cell, isFavorite: success)
+        self.presenter?.showFavoriteFeedback(response: response)
     }
     
 }

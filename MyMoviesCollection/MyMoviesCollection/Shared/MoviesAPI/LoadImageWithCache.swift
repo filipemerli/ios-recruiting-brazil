@@ -9,16 +9,12 @@
 import Foundation
 import UIKit
 
-class LoadImageWithCache {
+final class LoadImageWithCache {
 
     // MARK: - Constants
 
-    let imageCache = NSCache<NSString, AnyObject>()
+    fileprivate let imageCache = NSCache<NSString, AnyObject>()
     static var shared = LoadImageWithCache()
-    
-    // MARK: - Properties
-
-    var imageURLString: String?
     
     // MARK: - Class Functions
     

@@ -8,11 +8,11 @@
 
 import UIKit
 
-class FavoritesWorker {
+final class FavoritesWorker {
     
     private let apiClient: MoviesAPIClient
     private let loadImage: LoadImageWithCache
- 
+    
     init(apiClient: MoviesAPIClient = MoviesAPIClient.shared, loadImage: LoadImageWithCache = LoadImageWithCache.shared) {
         self.apiClient = apiClient
         self.loadImage = loadImage
@@ -25,12 +25,6 @@ class FavoritesWorker {
     func fetchFavorites(_ completion: @escaping (Result<[FavoriteMovie], ResponseError>) -> ()) {
         let dataManager = PersistanceManager()
         dataManager.fetchFavoritesList(completion)
-    }
-    
-    func deleteFavorite(movieId: Int32, _ completion: @escaping (Bool) -> ()) {
-        let dataManager = PersistanceManager()
-        let result = dataManager.deleteFavorite(id: movieId)
-        completion(result)
     }
     
 }

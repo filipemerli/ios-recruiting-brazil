@@ -15,7 +15,7 @@ protocol FavoritesPresentationLogic {
     func showError(withMessage message: String)
 }
 
-class FavoritesPresenter: FavoritesPresentationLogic {
+final class FavoritesPresenter: FavoritesPresentationLogic {
     
     weak var viewController: (FavoritesViewController)?
     

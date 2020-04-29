@@ -18,10 +18,11 @@ protocol FavoritesDataStore {
     //var movie: Movie { get set }  *** TO DO: Check this
 }
 
-class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
+final class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
 
     var presenter: FavoritesPresentationLogic?
     private var worker: FavoritesWorker?
+    var dataManager: PersistanceManager?
     
     init (worker: FavoritesWorker = FavoritesWorker()) {
         self.worker = worker
@@ -57,14 +58,13 @@ class FavoritesInteractor: FavoritesBusinessLogic, FavoritesDataStore {
     }
     
     func deleteFavorite(request: Favorites.DeleteFavorite.Request) {
-        worker?.deleteFavorite(movieId: request.movieId, { success in
-            if success {
-                let response = Favorites.DeleteFavorite.Response(success: success, indexPath: request.indexPath)
-                self.presenter?.deleteFavorite(response: response)
-            } else {
-                self.presenter?.showError(withMessage: "Erro ao deletar favorito, tente novamente.")
-            }
-        })
+        let success = dataManager?.deleteFavorite(id: request.movieId) ?? false
+        if success {
+            let response = Favorites.DeleteFavorite.Response(success: success, indexPath: request.indexPath)
+            self.presenter?.deleteFavorite(response: response)
+        } else {
+            self.presenter?.showError(withMessage: "Erro ao deletar favorito, tente novamente.")
+        }
     }
     
 }

@@ -16,7 +16,7 @@ protocol MovieDetailDataPassing {
     var dataStore: MovieDetailDataStore? { get }
 }
 
-class MovieDetailRouter: NSObject, MovieDetailRoutingLogic, MovieDetailDataPassing {
+final class MovieDetailRouter: NSObject, MovieDetailRoutingLogic, MovieDetailDataPassing {
     
     weak var viewController: MovieDetailViewController?
     var dataStore: MovieDetailDataStore?

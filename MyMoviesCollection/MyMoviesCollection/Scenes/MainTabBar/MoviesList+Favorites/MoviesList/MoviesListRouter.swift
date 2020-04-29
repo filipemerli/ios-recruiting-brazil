@@ -17,7 +17,7 @@ protocol MoviesListDataPassing {
     var dataStore: MoviesListDataStore? { get }
 }
 
-class MoviesListRouter: NSObject, MoviesListRoutingLogic, MoviesListDataPassing {
+final class MoviesListRouter: NSObject, MoviesListRoutingLogic, MoviesListDataPassing {
     
     weak var viewController: MoviesListViewController?
     var dataStore: MoviesListDataStore?

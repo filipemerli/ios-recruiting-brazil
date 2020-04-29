@@ -8,11 +8,10 @@
 
 import CoreData
 
-class PersistanceManager {
+final class PersistanceManager {
     
-    static var shared = PersistanceManager()
-    let managedObjectContext = PersistanceService.context
-    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FavoriteMovie")
+    private let managedObjectContext = PersistanceService.context
+    private let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "FavoriteMovie")
     
     public func fetchFavoritesList(_ completion: @escaping (Result<[FavoriteMovie], ResponseError>) -> Void) {
         var favMovies: [FavoriteMovie] = []
@@ -31,12 +30,7 @@ class PersistanceManager {
         movieToSave.overview = movie.overview
         movieToSave.year = String(movie.releaseDate?.prefix(4) ?? "0000")
         movieToSave.posterUrl = movie.posterUrl
-        do {
-           try managedObjectContext.save()
-            return true
-        } catch {
-            return false
-        }
+        return PersistanceService.saveContext()
         
     }
     

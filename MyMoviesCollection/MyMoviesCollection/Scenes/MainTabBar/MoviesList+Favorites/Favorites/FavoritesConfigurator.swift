@@ -8,7 +8,7 @@
 
 import Foundation
 
-class FavoritesConfigurator {
+final class FavoritesConfigurator {
     
     static let shared = FavoritesConfigurator()
     
@@ -16,11 +16,13 @@ class FavoritesConfigurator {
         let interactor = FavoritesInteractor()
         let presenter = FavoritesPresenter()
         let router = FavoritesRouter()
+        let dataManager = PersistanceManager()
         
         viewController.interactor = interactor
         viewController.router = router
         interactor.presenter = presenter
         presenter.viewController = viewController
+        interactor.dataManager = dataManager
         router.viewController = viewController
         router.dataStore = interactor
     }

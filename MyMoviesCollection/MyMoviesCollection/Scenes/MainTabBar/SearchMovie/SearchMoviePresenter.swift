@@ -15,7 +15,7 @@ protocol SearchMoviePresentationLogic {
     func showError(withMessage message: String)
 }
 
-class SearchMoviePresenter: SearchMoviePresentationLogic {
+final class SearchMoviePresenter: SearchMoviePresentationLogic {
     weak var viewController: (SearchMovieViewController)?
     
     func showMoviesList(response: SearchMovie.Fetch.Response) {
