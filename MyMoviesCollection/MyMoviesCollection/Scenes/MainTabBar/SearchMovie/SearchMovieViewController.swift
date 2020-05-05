@@ -20,7 +20,7 @@ final class SearchMovieViewController: UIViewController {
 
     private let observerName = "reloadSearch"
     public var searchString = ""
-    public var totalResults = 0
+    fileprivate var totalResults = 0
     private let reuseIdentifier = "movcell"
     private let itemsPerRow: CGFloat = 2
     private let numOfSects = 2
@@ -32,12 +32,13 @@ final class SearchMovieViewController: UIViewController {
     private var isPrefetching = false
     private var isPrefetchingDisabled = false
 
-    private var currentPage = 0 {
+    fileprivate var currentPage = 0 {
         didSet {
-            if currentPage > 1 {
-                let request = SearchMovie.Fetch.Request(page: currentPage)
-                interactor?.fetchSearchMovies(request: request)
+            if currentPage == 0 {
+                currentPage += 1
             }
+            let request = SearchMovie.Fetch.Request(page: currentPage)
+            interactor?.fetchSearchMovies(request: request)
         }
     }
     
@@ -117,9 +118,13 @@ final class SearchMovieViewController: UIViewController {
         if viewState != .loaded {
             viewState = .loading
         }
-        if currentPage == 0 {
-            interactor?.fetchSearchMovies(request: SearchMovie.Fetch.Request(page: 1))
-        }
+        currentPage = 0
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        currentPage = 0
+        movies.removeAll()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -157,7 +162,6 @@ final class SearchMovieViewController: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: observerName), object: nil)
         movies.removeAll()
-        currentPage = 0
         searchString = ""
     }
     
@@ -229,14 +233,27 @@ extension SearchMovieViewController: SearchMovieDisplayLogic {
             isPrefetchingDisabled = true
             return
         }
+        let lowerRange = movies.count
         movies.append(contentsOf: viewModel.movies)
+        let upperRange = movies.count
         searchString = viewModel.keyWord
         totalResults = viewModel.totalResults
-        currentPage += 1
+        let indexPaths = (lowerRange..<upperRange)
+            .map { IndexPath(item: $0, section: 0) }
         viewState = movies.isEmpty ? .empty : .loaded
+        
         DispatchQueue.main.async {
-            self.collectionView.reloadData()
+            self.collectionView.performBatchUpdates({
+                self.collectionView.insertItems(at: indexPaths)
+            }) { completed in
+                guard completed else {
+                    self.collectionView.reloadData()
+                    return
+                }
+            }
         }
+        
+        
     }
     
     func renderMovieBanner(viewModel: SearchMovie.MovieInfo.ViewModelBanner) {
@@ -278,21 +295,19 @@ extension SearchMovieViewController: UICollectionViewDataSource {
         guard movies.count > 0 else {
             return cell
         }
-        cell.movieTitle = movies[indexPath.row].title
+        let movieCell = movies[indexPath.row]
+        cell.movieTitle = movieCell.title
+        if let movieBanner = movieCell.posterUrl {
+            interactor?.fetchBannerImage(request: SearchMovie.MovieInfo.RequestBanner(cell: cell, posterUrl: movieBanner))
+        }
+        if let movieId = movieCell.id {
+            interactor?.checkIfFavorite(request: SearchMovie.MovieInfo.RequestFavorite(cell: cell, movieId: movieId))
+        }
         return cell
-        
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         1
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        let movie = movies[indexPath.row]
-        let requestBanner = SearchMovie.MovieInfo.RequestBanner(cell: cell, posterUrl: movie.posterUrl ?? "https://")
-        let requestFavorite = SearchMovie.MovieInfo.RequestFavorite(cell: cell, movieId: movie.id ?? 0)
-        interactor?.fetchBannerImage(request: requestBanner)
-        interactor?.checkIfFavorite(request: requestFavorite)
     }
     
 }
@@ -324,7 +339,8 @@ extension SearchMovieViewController: UICollectionViewDataSourcePrefetching {
     
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         guard !isPrefetching && !isPrefetchingDisabled && movies.count < totalResults else { return }
-        let fetchMovies = indexPaths.contains { ($0.row >= movies.count - 1) }
+        
+        let fetchMovies = indexPaths.contains { (($0.row) + 2) >= movies.count }
         
         if fetchMovies {
             isPrefetching = true

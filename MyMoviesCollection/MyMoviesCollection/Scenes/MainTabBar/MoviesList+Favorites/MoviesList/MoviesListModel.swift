@@ -31,10 +31,7 @@ enum MoviesList {
         
         struct ViewModel {
             let movies: [Movie]
-            
-            init(movies: [Movie]) {
-                self.movies = movies
-            }
+            let totalResults: Int
         }
     }
     

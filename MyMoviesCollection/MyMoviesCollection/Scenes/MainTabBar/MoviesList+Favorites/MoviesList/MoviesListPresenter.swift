@@ -19,7 +19,7 @@ final class MoviesListPresenter: MoviesListPresentationLogic {
     weak var viewController: (MoviesListViewController)?
     
     func showMoviesList(response: MoviesList.Fetch.Response) {
-        let viewModel = MoviesList.Fetch.ViewModel(movies: response.movies)
+        let viewModel = MoviesList.Fetch.ViewModel(movies: response.movies, totalResults: response.total)
         viewController?.renderMoviesList(viewModel: viewModel)
     }
     

@@ -61,7 +61,11 @@ class MoviesCollectionViewCell: UICollectionViewCell {
         didSet {
             DispatchQueue.main.async {
                 self.activityIndicator.stopAnimating()
-                self.bannerView.image = self.bannerImage
+            }
+            if bannerImage != nil {
+                DispatchQueue.main.async {
+                    self.bannerView.image = self.bannerImage
+                }
             }
         }
     }
@@ -96,8 +100,9 @@ class MoviesCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        bannerView.image = #imageLiteral(resourceName: "placeholder")
+        bannerView.image = UIImage(imageLiteralResourceName: ConstantsKeys.kPlaceholderImage)
         favoriteButton.isSelected = false
+        titleText.text = ""
     }
 
     // MARK: - Class Functions

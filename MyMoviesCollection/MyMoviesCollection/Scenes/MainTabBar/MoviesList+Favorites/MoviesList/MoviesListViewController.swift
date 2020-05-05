@@ -46,17 +46,18 @@ final class MoviesListViewController: UIViewController {
     private let observerName = "reloadMovies"
     var interactor: MoviesListBusinessLogic?
     var router: (NSObjectProtocol & MoviesListRoutingLogic & MoviesListDataPassing)?
-    private let itemsPerRow: CGFloat = 2
-    private let numOfSects = 2
-    private let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
-    private var movies = [Movie]()
-    private let reuseIdentifier = "movcell"
-    private let collectionLayout = UICollectionViewFlowLayout()
+    fileprivate var totalResults = 0
+    fileprivate let itemsPerRow: CGFloat = 2
+    fileprivate let numOfSects = 2
+    fileprivate let sectionInsets = UIEdgeInsets(top: 10.0, left: 10.0, bottom: 5.0, right: 10.0)
+    fileprivate var movies = [Movie]()
+    fileprivate let reuseIdentifier = "movcell"
+    fileprivate let collectionLayout = UICollectionViewFlowLayout()
     public var movieToPresent: Movie?
     public var keyWord: String?
     
-    private var isPrefetching = false
-    private var currentPage = 0 {
+    fileprivate var isPrefetching = false
+    fileprivate var currentPage = 0 {
         didSet {
             if currentPage == 0 {
                 currentPage += 1
@@ -193,11 +194,30 @@ extension MoviesListViewController: MoviesListDisplayLogic {
             isPrefetchingDisabled = true
             return
         }
+        let lowerRange = movies.count
         movies.append(contentsOf: viewModel.movies)
+        totalResults = viewModel.totalResults
+        let upperRange = movies.count
+        
+        let indexPaths = (lowerRange..<upperRange)
+            .map { IndexPath(item: $0, section: 0) }
         viewState = movies.isEmpty ? .empty : .loaded
+        
         DispatchQueue.main.async {
-            self.collectionView.reloadData()
+            if lowerRange == 0 {
+                self.collectionView.reloadData()
+            } else {
+                self.collectionView.performBatchUpdates({
+                    self.collectionView.insertItems(at: indexPaths)
+                }) { completed in
+                    guard completed else {
+                        self.collectionView.reloadData()
+                        return
+                    }
+                }
+            }
         }
+        
     }
     
     func renderMovieBanner(viewModel: MoviesList.MovieInfo.ViewModelBanner) {
@@ -240,8 +260,12 @@ extension MoviesListViewController: UICollectionViewDataSource {
         }
         let movieCell = movies[indexPath.row]
         cell.movieTitle = movieCell.title
-        interactor?.checkIfFavorite(request: MoviesList.MovieInfo.RequestFavorite(cell: cell, movieId: movieCell.id ?? 0))
-        interactor?.fetchBannerImage(request: MoviesList.MovieInfo.RequestBanner(cell: cell, posterUrl: movieCell.posterUrl ?? "https://"))
+        if let movieBanner = movieCell.posterUrl {
+            interactor?.fetchBannerImage(request: MoviesList.MovieInfo.RequestBanner(cell: cell, posterUrl: movieBanner))
+        }
+        if let movieId = movieCell.id {
+            interactor?.checkIfFavorite(request: MoviesList.MovieInfo.RequestFavorite(cell: cell, movieId: movieId))
+        }
         return cell
     }
     
@@ -276,7 +300,7 @@ extension MoviesListViewController: UICollectionViewDelegateFlowLayout {
 extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
     
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
-        guard !isPrefetching && !isPrefetchingDisabled else { return }
+        guard !isPrefetching && !isPrefetchingDisabled && movies.count < totalResults else { return }
         
         let fetchMovies = indexPaths.contains { (($0.row) + 1) >= movies.count }
         
