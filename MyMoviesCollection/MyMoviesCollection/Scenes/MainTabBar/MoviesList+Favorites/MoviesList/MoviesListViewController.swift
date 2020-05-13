@@ -137,6 +137,10 @@ final class MoviesListViewController: UIViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        self.dismissKeyboard()
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if let navTopItem = navigationController?.navigationBar.topItem {
@@ -317,6 +321,7 @@ extension MoviesListViewController: UICollectionViewDataSourcePrefetching {
 extension MoviesListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         keyWord = searchBar.text ?? ""
+        searchBar.resignFirstResponder()
         router?.routeToSearch(source: self)
     }
 }

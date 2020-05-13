@@ -117,14 +117,9 @@ final class SearchMovieViewController: UIViewController {
         super.viewWillAppear(animated)
         if viewState != .loaded {
             viewState = .loading
+            currentPage = 0
         }
-        currentPage = 0
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        currentPage = 0
-        movies.removeAll()
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {
